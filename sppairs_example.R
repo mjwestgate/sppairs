@@ -1,4 +1,4 @@
-# This script uses naa to generate some of the results from the paper describing that technique.
+# Example of available tools in sppairs
 
 # Load required packages
 library(devtools)
@@ -13,16 +13,15 @@ data(beetles)
 # First, try a simple approach using contingency tables
 or.contingency(beetles[, c(1, 10)])
 # Alternatively, the symmetric odds ratio can be calculated from regression:
-	# using glm(); should give similar results to above
+# using glm(); should give similar results to above
 or.regression(beetles[, c(1, 10)])	
-	# using mixed models to account for repeat visits (requires lme4)
-# create grouping variable for example purposes ONLY
-groups<-as.factor(rep(c(1:10), length.out=dim(beetles)[1]))
+# using mixed models to account for repeat visits (requires lme4)
+groups<-as.factor(rep(c(1:10), length.out=dim(beetles)[1])) # create grouping variable for example purposes ONLY
 or.regression(beetles[, c(1, 10)], random.effect=groups)
 
 # Calculate odds ratios for all pairs of species.
 or.test<-pairwise.odds.ratios(beetles, rarity.cutoff=0.1)
-# NOTES: 
+# NOTE: 
 	# 1. This can take a long time; particularly for many spp.
 	# 2. glmer in lme4 v1+ often gives error messages. 
 
@@ -31,7 +30,7 @@ or.test<-pairwise.odds.ratios(beetles, rarity.cutoff=0.1)
 hist(or.test$frequency[, 2], las=1, xlim=c(0, 1),
 	xlab="proportion", ylab="number of species", main="proportion of sites occupied by each spp.")
 # Histogram of odds ratios
-hist(or.test$result.long$odds, breaks=c(c(0, 0.333, 0.666), seq(1, 4, 0.5), Inf), xlim=c(0, 4), las=1,
+hist(or.test$result.long$odds, breaks=c(c(0, 0.333, 0.666), 0, seq(1, 4, 0.5), Inf), xlim=c(0, 4), las=1,
 	xlab="odds ratio", main="Results of pairwise.odds.ratio() for all sites and spp.")
 # how many spp. in each indicator category?
 length(which(or.test$result.long$odds>3))	#  n pairs of significant indicators
