@@ -20,8 +20,9 @@ result<-as.matrix(result.positive)+ as.matrix(result.negative)
 result.freq<-apply(
 	cbind(colSums(result, na.rm=TRUE), rowSums(result, na.rm=TRUE)), 1, sum)
 rows<-which(result.freq==0)
-result<-result[-rows, -rows]
-species.results<-species.results[-rows, ]	
+if(length(rows)>0)
+	{result<-result[-rows, -rows]
+	species.results<-species.results[-rows, ]	}
 
 # get plot coordinates using igraph
 net<-graph.adjacency(result, mode="directed", weighted=TRUE, diag=FALSE)
@@ -76,11 +77,13 @@ if(reduce){if(any(line.data$arrow.code==99)){line.data<-line.data[-which(line.da
 
 # set colours & widths
 rows.pos<-which(c(line.data$odds>threshold & line.data$odds!=Inf)==TRUE)
-line.data$colour[rows.pos]<-"red"
-line.data$width[rows.pos]<-lwd.scale(log10(line.data$odds[rows.pos]-threshold+1))
-rows.neg<-which(c(line.data$odds<threshold & line.data$odds!=0)==TRUE)
-line.data$colour[rows.neg]<-"blue"
-line.data$width[rows.neg]<-lwd.scale(log10(1/(line.data$odds[rows.neg]+0.01)))
+if(length(rows.pos)>0){
+	line.data$colour[rows.pos]<-"red"
+	line.data$width[rows.pos]<-lwd.scale(log10(line.data$odds[rows.pos]-threshold+1))}
+	rows.neg<-which(c(line.data$odds<threshold & line.data$odds!=0)==TRUE)
+if(length(rows.neg)>0){
+	line.data$colour[rows.neg]<-"blue"
+	line.data$width[rows.neg]<-lwd.scale(log10(1/(line.data$odds[rows.neg]+0.01)))}
 
 # set colours & widths for special cases
 if(any(line.data$odds==Inf)){
@@ -160,6 +163,9 @@ plot.pairs<-function(points, lines, draw.frequencies, add.key)
 # set defaults
 if(missing(draw.frequencies))draw.frequencies<-"both"
 if(missing(add.key))add.key<-"species"
+
+# set some error messages
+if(dim(points)[1]==0)stop("Error: no strong inter-species associations identified")
 
 # how much should the arrows be adjusted?
 interpoint.dist<-mean(c((max(points[, 3])-min(points[, 3])), (max(points[, 4])-min(points[, 4]))))
