@@ -1,0 +1,14 @@
+make.binary		Convert an abundance dataset to presence/absence
+prop.occupied		Calculate the proportion of rows that are occupied
+odds.ratio.test		Check input datasets for compatability with later functions
+or.contingency		Calculate asymmetric odds ratio from a contingency table
+or.regression		Calculate asymmetric odds ratio using logistic regression
+pairwise.odds.ratios	Calculate odds ratios for all pairs of columns (species)
+pairwise.or.matrix	Converts pairwise.or results from long to wide format
+or.points		Use igraph to calculate sensible point locations
+or.lines		Set line properties for plotting
+lwd.scale		get sensible line widths
+shorten.line		shorten arrow lengths, so that arrowheads are always visible
+arrows.default		draw sensible arrows
+offset.line		perpendicularly offset lines where arrows occur in both directions
+plot.pairs		plot results from or.points and or.lines

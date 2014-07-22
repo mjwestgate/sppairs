@@ -1,8 +1,4 @@
-#' Odds Ratio Test 
-#' 
-# Simple, internal function to check input datasets for compatability with later functions in library(naa). Checks the number of columns; whether they are numeric; and whether they are binary.
-#' @param dataset a two-column matrix or data.frame containing presence/absence data for two species
-#' @return Gives either an error message, or invisibly returns 'dataset' (possibly corrected by 'make.binary')
+# Simple, internal function to check input datasets for compatability with later functions in library(sppairs)
 odds.ratio.test<-function(dataset)
 {
 if(dim(dataset)[2]!=2){stop("input does not have two columns")}		# check size
@@ -13,11 +9,8 @@ for(i in 1:2){if(any(c("numeric", "integer")==test[i])==F)
 invisible(dataset)		# return the (possibly corrected) dataset for use in later functions.
 }
 
-#' Odds ratio calculation using a contingency table
-#' 
-#' Calculate asymmetric odds ratio from a contingency table
-#' @param dataset Two column data.frame, with presence/absence for two species
-#' @return Value of the odds ratio between those species
+
+# Calculate asymmetric odds ratio from a contingency table
 or.contingency<-function(dataset)	
 {
 dataset<-odds.ratio.test(dataset)		# will either correct the dataset, or stop this function with an error
@@ -27,18 +20,14 @@ odds.ratio<-(c/d) / ( (c+e) / (d+f) )
 return(odds.ratio)
 }
 
-#' Odds ratio calculation using regression
-#' 
-#' Calculate asymmetric odds ratio using logistic regression. Random effects can be specified to account for multiple visits to the same site (using glmer in lme4).
-#' @param dataset Two column data.frame containing species occurrence. Note that first column is species A and second species B, where A is the species subject to investigation (i.e. does p/a of B affect A?)
-#' @param random.effect # if specified, should be a factor to be used as random effect in glmer(lme4). If missing, glm() is used to calculate the odds ratio
-#' @return value of the odds ratio between those species
+
+# Odds ratio calculation using regression
 or.regression<-function(dataset, random.effect)
 {
 dataset<-odds.ratio.test(dataset)		# will either correct the dataset, or stop this function with an error
 b<-(1/dim(dataset)[1])*sum(dataset[, 2])		# proportion of sites at which sp. B occurred
 require(boot)	# for logit() & inv.logit
-  
+
 # To call or.regression without random effects (note this should give similar results to or.contingency()):
 if(missing(random.effect))	
 	{
@@ -66,14 +55,7 @@ return(odds.ratio)
 } 
 
 
-#' Pairwise odds ratio calculation
-#'
-#' Calculates a number of odds ratios for all (sufficiently common) species. Basically a wrapper function for or.contingency() and or.regression().
-#' @param dataset data.frame where each column is a species. Rows can be sites or visits; if visits, a grouping factor is a good idea.
-#' @param random.effect Grouping variable for visits, if given. Passed to or.regression()
-#' @param rarity.cutoff Minimum proportion of occupied sites/visits for a species (column) to be included. Defaults to 0.1.
-#' @param quiet If TRUE, code does not give a progress report. Defaults to FALSE.
-#' @return A list containing the components: [[1]] the frequency at which species occur at sites; [[2]] pairwise odds ratios in long format; [[3]] pairwise odds ratios in wide format
+# Pairwise odds ratio calculation
 pairwise.odds.ratios<-function(dataset, random.effect, rarity.cutoff, quiet)
 {
 if(missing(quiet))quiet<-FALSE
@@ -137,11 +119,7 @@ return(output)
 }
 
 
-#' Pairwise odds ratio matrix
-#'
-#' Internal function to convert the 'long' output from pairwise.odds.ratios() into a matrix
-#' @param or.object data.frame containing columns listing the two species being compared, and the odds ratio between them
-#' @return A matrix
+# Internal function to convert the 'long' output from pairwise.odds.ratios() into a matrix
 pairwise.or.matrix<-function(or.object)
 {
 # work out species info

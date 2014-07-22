@@ -1,14 +1,2 @@
-# Export
-
-export(“odds.ratio.test”, “or.contingency”, “or.regression”, # odds ratio calcs
-“pairwise.odds.ratios”, # wrapper function
-“or.points”, “or.lines”, “plot.pairs”) # plot functions
-
-# Not exported (internal)
-# make.binary
-# prop.occupied
-# pairwise.or.matrix
-# lwd.scale
-# arrows.default
-# shorten.line
-# offset.line
+export(odds.ratio.test, or.contingency, or.regression,
+pairwise.odds.ratios, or.points, or.lines, plot.pairs)
