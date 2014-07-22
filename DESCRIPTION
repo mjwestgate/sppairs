@@ -1,0 +1,15 @@
+Package: sppairs
+Version: 0.1
+Date: 2014/07/22
+Title: Species Pairwise Association Analysis (SPAA)
+Author: Martin J. Westgate <martinjwestgate@gmail.com>, Peter W. Lane
+Maintainer: Martin Westgate <martinjwestgate@gmail.com>
+Description: Runs (and optionally, plots) the results of Network Association
+    Analysis (NAA). NAA calculates pairwise associations between species using
+    odds ratios.
+Depends:
+    R (>= 3.1.0),
+    igraph,
+    lme4,
+License: GPL (>=2)
+LazyData: NA
