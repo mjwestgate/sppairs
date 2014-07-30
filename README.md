@@ -1,5 +1,5 @@
 # sppairs
-# Species Pairwise Association Analysis (SPAA) in R
+# Species Pairwise Association Analysis (SPAA)
 
 SPAA uses odds ratios to calculate and visualise pairwise associations between species from presence/absence data. It is a simple method that can be applied to site by species matrices in a range of contexts, and provides an alternative to dissimilarity-based approaches.
 
