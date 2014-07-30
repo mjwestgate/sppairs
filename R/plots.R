@@ -95,7 +95,7 @@ line.widths<-c(2, 3, 2, 1, 0, 1, 2, 3, 2)
 line.data$colour<-as.character(cut(line.data$odds,
  	breaks=line.breaks, labels=line.cols,
 	include.lowest=TRUE))
-line.data$width<-line.widths[as.numeric(as.character(cut(test.lines$odds,
+line.data$width<-line.widths[as.numeric(as.character(cut(line.data$odds,
  	breaks=line.breaks, labels=c(1:9), include.lowest=TRUE)))]
 
 return(line.data)
