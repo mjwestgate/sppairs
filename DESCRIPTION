@@ -7,5 +7,5 @@ Maintainer: Martin J. Westgate <martinjwestgate@gmail.com>
 Description: Runs (and optionally, plots) the results of Network Association
     Analysis (NAA). NAA calculates pairwise associations between species using
     odds ratios.
-Depends: R (>= 3.1.0), igraph, lme4,
+Depends: R (>= 3.1.0), igraph, lme4, RColorBrewer
 License: GPL-2

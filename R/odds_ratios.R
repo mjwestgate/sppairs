@@ -86,20 +86,12 @@ combinations.final<-data.frame(
 combinations.final$odds<-as.numeric(combinations.final$odds)
   
 # run odds.ratio calculation for each pair
-n.rows<-dim(combinations.final)[1]
-cat(paste("calculating", dim(combinations.final)[1], "combinations of", n.species, "species.", sep=" ")) 
 if(quiet==FALSE){
-	pings<-seq(20, n.rows, 20)
-	cat(" n(rows) calculated = ")}
+	n.rows<-dim(combinations.final)[1]
+	cat(paste("calculating", n.rows, "combinations of", n.species, "species.", sep=" "))}
 
-# run loop
+# run analysis in loop
 for(i in 1:dim(combinations.final)[1]){
-	if(quiet==FALSE){	# create an output meter
-  		if(any(pings==i)){	
-    		thisrun<-which(pings==i)
-    		cat(paste(pings[thisrun], " ... ", sep=""))}}
-
-	# then run analysis
 	dataset.thisrun<-dataset[, c(combinations.final$col1[i], combinations.final$col2[i])]
 	or.simple<-or.contingency(dataset.thisrun)	# run as a test: req. as glmer will fail if no overlap in presences.
 	if(missing(random.effect)){combinations.final$odds[i]<-or.simple

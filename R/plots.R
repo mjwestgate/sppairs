@@ -1,7 +1,7 @@
 # Use igraph to calculate sensible point locations
 or.points<-function(dataset, threshold)
 {
-require(igraph)
+library(igraph)
 if(missing(threshold))threshold<-3
 
 # select input data
@@ -30,6 +30,18 @@ layout<-layout.fruchterman.reingold(net)
 points<-as.data.frame(cbind(species.results, layout))
 colnames(points)[2:4]<-c("freq", "x", "y")
 
+# set some colours
+bg.list<-brewer.pal(8, "Set2")[c(3, 5, 6, 2, 4)] #c("deepskyblue", "aquamarine", "")
+col.list<-c("blue", "green", "yellow", "orange", "red")
+break.values<-c(0, 0.1, 0.25, 0.5, 0.75, 1)
+
+points$bg<-as.character(cut(points$freq, 
+	breaks= break.values,
+	labels= bg.list))
+points$col<-as.character(cut(points$freq, breaks= break.values,
+	labels= col.list))
+points$cex<-2+(4*points$freq)
+
 return(points)
 }
 
@@ -37,6 +49,7 @@ return(points)
 # Function for setting the attributes of lines, to be drawn between points given by or.points()
 or.lines<-function(dataset, threshold, reduce)
 {
+library(RColorBrewer)
 if(missing(threshold))threshold<-3
 if(missing(reduce))reduce<-TRUE
 
@@ -76,24 +89,14 @@ if(any(test==TRUE)){
 if(reduce){if(any(line.data$arrow.code==99)){line.data<-line.data[-which(line.data$arrow.code==99), ]}}
 
 # set colours & widths
-rows.pos<-which(c(line.data$odds>threshold & line.data$odds!=Inf)==TRUE)
-if(length(rows.pos)>0){
-	line.data$colour[rows.pos]<-"red"
-	line.data$width[rows.pos]<-lwd.scale(log10(line.data$odds[rows.pos]-threshold+1))}
-	rows.neg<-which(c(line.data$odds<threshold & line.data$odds!=0)==TRUE)
-if(length(rows.neg)>0){
-	line.data$colour[rows.neg]<-"blue"
-	line.data$width[rows.neg]<-lwd.scale(log10(1/(line.data$odds[rows.neg]+0.01)))}
-
-# set colours & widths for special cases
-if(any(line.data$odds==Inf)){
-	rows.inf<-which(line.data$odds==Inf)
-	line.data$colour[rows.inf]<-"magenta"
-	line.data$width[rows.inf]<-2}		
-if(any(line.data$odds==0)){
-	rows.inf<-which(line.data$odds==0)
-	line.data$colour[rows.inf]<-"black"
-	line.data$width[rows.inf]<-2}		
+line.breaks<-c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf)
+line.cols<-c("black", brewer.pal(7, "RdBu")[7:1], "magenta")
+line.widths<-c(2, 3, 2, 1, 0, 1, 2, 3, 2)
+line.data$colour<-as.character(cut(line.data$odds,
+ 	breaks=line.breaks, labels=line.cols,
+	include.lowest=TRUE))
+line.data$width<-line.widths[as.numeric(as.character(cut(test.lines$odds,
+ 	breaks=line.breaks, labels=c(1:9), include.lowest=TRUE)))]
 
 return(line.data)
 }
@@ -161,24 +164,51 @@ return(coordinates.new)
 plot.pairs<-function(points, lines, draw.frequencies, add.key)
 {
 # set defaults
-if(missing(draw.frequencies))draw.frequencies<-"both"
+if(missing(draw.frequencies))draw.frequencies<-TRUE
 if(missing(add.key))add.key<-"species"
 
-# set some error messages
+# set error messages
 if(dim(points)[1]==0)stop("Error: no strong inter-species associations identified")
 
-# how much should the arrows be adjusted?
+switch(add.key,
+	"none"={draw.sppairs(points, lines, draw.frequencies)},
+	"species"={
+		split.screen(matrix(c(0, 0.7, 0, 1, 0.7, 1, 0, 1), nrow=2, ncol=4, byrow=T))	
+		screen(1); draw.sppairs(points, lines, draw.frequencies)
+		screen(2); draw.spp.key(points, draw.frequencies)
+		close.screen(all.screens=TRUE)},
+	"object"={
+		split.screen(matrix(c(0, 0.8, 0, 1, 0.8, 1, 0, 1), nrow=2, ncol=4, byrow=T))
+		screen(1); draw.sppairs(points, lines, draw.frequencies)
+		screen(2); draw.object.key(draw.frequencies)
+		close.screen(all.screens=TRUE)},
+	"both"={
+		split.screen(matrix(c(0, 0.6, 0, 1, 0.6, 0.8, 0, 1, 0.8, 1, 0, 1), nrow=3, ncol=4, byrow=T))
+		screen(1); draw.sppairs(points, lines, draw.frequencies)
+		screen(2); draw.spp.key(points, draw.frequencies)
+		screen(3); draw.object.key(draw.frequencies)
+		close.screen(all.screens=TRUE)}
+	)
+}	# end plot.pairs
+
+
+draw.object.key<-function(draw.frequencies)
+	{
+	if(draw.frequencies){
+		screens<-split.screen(matrix(c(0, 1, 0, 0.5, 0, 1, 0.5, 1), nrow=2, ncol=4, byrow=T))
+		screen(screens[1]); draw.line.key()
+		screen(screens[2]); draw.point.key()
+	}else{draw.line.key()}
+	}
+
+
+
+draw.sppairs<-function(points, lines, draw.frequencies)
+{
+# how much should we adjust point sizes etc.?
 interpoint.dist<-mean(c((max(points[, 3])-min(points[, 3])), (max(points[, 4])-min(points[, 4]))))
 
 # set plot region
-if(any(c("objects", "species")==add.key)){
-	split.screen(matrix(c(0, 0.7, 0, 1, 0.7, 1, 0, 1), nrow=2, ncol=4, byrow=T))
-	screen(1)	
-}else{if(add.key=="both"){
-	split.screen(matrix(c(0, 0.7, 0, 1, 0.7, 1, 0.2, 1, 0.7, 1, 0, 0.2), nrow=3, ncol=4, byrow=T))
-	screen(1)	
-}}
-
 par(mar=c(1,1,1,1), cex=0.7)
 plot(x=points$x, y=points$y, type="n", ann=F, axes=F, asp=1)
 
@@ -210,58 +240,62 @@ arrows.default(line.thisrun, col=lines$colour[i],
 	lwd=lines$width[i], code=lines$arrow.code[i])
 }
   
-# set point sizes/colours
-point.cols<-as.character(cut(points$freq, breaks=c(0, 0.036, 0.1, 0.25, 0.5, 0.75, 1),
-	labels=c("blue", "green", "yellow", "brown1", "orange", "red")))
-point.edge.cols<-as.character(cut(points$freq, breaks=c(0, 0.036, 0.1, 0.25, 0.5, 0.75, 1),
-	labels=c("darkblue", "darkgreen", "darkgoldenrod1", "brown3", "darkorange", "darkred")))
-point.cex<-2+(4*points$freq)
-
-# overwrite these calculations if not required
-if(draw.frequencies=="none"){point.cols<-"white"; point.edge.cols<-"black"; point.cex<-3}
-if(draw.frequencies=="size"){point.cols<-"white"; point.edge.cols<-"black"}
-if(draw.frequencies=="colour"){point.cex<-3}
-
 # add numbered points
-points(points$x, points$y, pch=21, bg=point.cols, col=point.edge.cols, cex= point.cex)
+if(draw.frequencies==TRUE){
+	points(points$x, points$y, pch=21, bg=points$bg, col=points$col, cex=points$cex)
+}else{
+	points(points$x, points$y, pch=21, bg="white", col="black", cex=3)}
 text(points$x, points$y, labels=c(1: dim(points)[1]), cex=0.7, col="black")
 
+}	# end draw.sppairs()
 
-# ADD KEYS (according to behaviour set by add.keys)
-# add species list first
-if(any(c("species", "both")==add.key))
-{
-screen(2)
-par(mar=rep(0, 4), cex=0.6)
-plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, 1.05))
-text(x=c(0, 0.1), y=rep(1.05, 2), labels=c("#", "Species"), font=2, pos=4)
-text(x=0, y=seq(1, 0, length.out=dim(points)[1]), labels=c(1:dim(points)[1]), pos=4)
-text(x=0.1, y=seq(1, 0, length.out=dim(points)[1]), labels=points$species, pos=4)		
-}
 
-if(any(c("objects", "both")==add.key))
-	{
-	if(add.key=="objects"){screen(2)}else{screen(3)}
 
-	# calculate line widths
-	pos.vals<-lines[which(lines$colour=="red"), ]
-	pos.labels<-round(seq(min(pos.vals$odds), max(pos.vals$odds), length.out=4), 2)
-	pos.lwd<-seq(1, 3, length.out=4)
-	neg.vals<-lines[which(lines$colour=="blue"), ]
-	neg.labels<-round(seq(max(neg.vals$odds), min(neg.vals$odds), length.out=4), 2)
-	neg.lwd<-seq(1, 3, length.out=4)
+draw.spp.key<-function(points, draw.frequencies){
+	par(mar=rep(0, 4), cex=0.6)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, 1.05))
+	text(x=0.1, y=1.05, labels="Species", font=2, pos=4)
+	if(draw.frequencies==TRUE){
+		points(rep(0, dim(points)[1]), seq(1, 0, length.out=dim(points)[1]), 
+		pch=21, bg=points$bg, col=points$col, cex=points$cex)
+	}else{
+		points(rep(0, dim(points)[1]), seq(1, 0, length.out=dim(points)[1]), 
+		pch=21, bg="white", col="black", cex=3)}
+	text(x=0, y=seq(1, 0, length.out=dim(points)[1]), labels=c(1:dim(points)[1]))
+	text(x=0.1, y=seq(1, 0, length.out=dim(points)[1]), labels=points$species, pos=4)	
+	}
 
+
+draw.point.key<-function(){
+	bg.list<-brewer.pal(8, "Set2")[c(3, 5, 6, 2, 4)] 
+	col.list<-c("blue", "green", "yellow", "orange", "red")
+	break.values<-c(0, 0.1, 0.25, 0.5, 0.75, 1)
+	point.labels<-paste(break.values[1:5], break.values[2:6], sep=" - ")
+	point.cex<-2+(4*break.values[2:6])
+
+	par(mar=c(0, 0, 1, 0), cex=0.5)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.2, 1), ylim=c(0.5, 5.5))
+	points(x=rep(0.9, 5), y=c(1:5), pch=21,
+		bg=bg.list, col=col.list, cex=point.cex)
+	text(x=rep(0.8, 5), y=c(1:5), pos=2, cex=1,
+		labels= point.labels)
+	mtext("spp. occurrence", side=3, cex=0.5, adj=0.5)
+	}
+
+
+draw.line.key<-function(){
+	library(RColorBrewer)
+	line.breaks<-c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf)
+	line.labels<-c("0", "<1/9", "<1/6", "<1/3", ">3", ">6", ">9", "Inf")
+	line.cols<-c("black", brewer.pal(7, "RdBu")[c(7:5, 3:1)], "magenta")
+	line.widths<-c(2, 3, 2, 1, 1, 2, 3, 2)
 	# add plot
-	par(mar=c(2, 0, 0, 0), cex=0.5)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 9), ylim=c(0, 1.1))
-	for(i in 1:4){lines(x=rep(c(4:1)[i], 2), y=c(0, 0.7), col="blue", lwd= neg.lwd[i], lend="butt")}
-	for(i in 1:4){lines(x=rep(c(5:8)[i], 2), y=c(0, 0.7), col="red", lwd= pos.lwd[i], lend="butt")}
-	axis(1, at=c(1:8), labels=c(neg.labels[4:1], pos.labels), lwd=0, line=-1, cex.axis=1)
-	arrows(x0=4, x1=1, y0=0.8, y1=0.8, length=0.05)
-	arrows(x0=5, x1=8, y0=0.8, y1=0.8, length=0.05)
-	text(x=c(2.5, 6.5), rep(0.8, 2), labels=c("negative", "positive"), pos=3)
-	mtext("odds ratio", side=2, line=-1.3, cex=0.5, adj=0.3)
-}
+	par(mar=c(0, 3, 0, 0), cex=0.5)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, 9))
+	for(i in 1:8){
+		lines(x=c(0.1, 1), y=rep(c(1:8)[i], 2), 
+			col= line.cols[i], lwd= line.widths[i], lend="butt")}
+	axis(2, at=c(1:8), labels=line.labels, lwd=0, line=-1, cex.axis=1, las=1)
+	mtext("odds ratio", side=3, line=-1.3, cex=0.5, adj=0.5)
+	}
 
-close.screen(all.screens=TRUE)
-}

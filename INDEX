@@ -11,4 +11,9 @@ lwd.scale		get sensible line widths
 shorten.line		shorten arrow lengths, so that arrowheads are always visible
 arrows.default		draw sensible arrows
 offset.line		perpendicularly offset lines where arrows occur in both directions
-plot.pairs		plot results from or.points and or.lines
+plot.pairs		wrapper function to plot results from or.points and or.lines
+draw.sppairs		draw results from or.points and or.lines without keys
+draw.object.key		set plot behaviour for keys in plot.pairs
+draw.spp.key		draw a key to species labels in draw.sppairs
+draw.point.key		draw a key to point sizes and colours in draw.sppairs
+draw.line.key		draw a key to line widths and colours in draw.sppairs
