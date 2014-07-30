@@ -1,15 +1,15 @@
 # sppairs
 # Species Pairwise Association Analysis (SPAA)
 
-SPAA uses odds ratios to calculate and visualise pairwise associations between species from presence/absence data. It is a simple method that can be applied to site by species matrices in a range of contexts, and provides an alternative to dissimilarity-based approaches.
-
-This package gives a simple implementation of Lane's approach. *Improvements will be made over time, but you should treat this as in beta for the time being.* You can read a full description of SPAA in this article:
+SPAA uses odds ratios to calculate and visualise pairwise associations between species from presence/absence data. It is a simple method that can be applied to site by species matrices in a range of contexts, and provides an alternative to dissimilarity-based approaches. You can read a full description of SPAA in this article:
 
     Lane, P.W., D.B. Lindenmayer, P.S. Barton, W. Blanchard & M.J. Westgate (2014) 
     "Visualisation of species pairwise associations: a case study of surrogacy in 
     bird assemblages" Ecology and Evolution. DOI: 10.1002/ece3.1182
     
 Available here: http://onlinelibrary.wiley.com/doi/10.1002/ece3.1182/full
+
+This package gives a simple implementation of Lane's approach. *Improvements will be made over time, but you should treat this as in beta for the time being.*
 
 Author: Martin Westgate <martinjwestgate@gmail.com> & Peter Lane
 
