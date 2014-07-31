@@ -7,9 +7,9 @@ SPAA uses odds ratios to calculate and visualise pairwise associations between s
     "Visualisation of species pairwise associations: a case study of surrogacy in 
     bird assemblages" Ecology and Evolution. DOI: 10.1002/ece3.1182
     
-Available here: http://onlinelibrary.wiley.com/doi/10.1002/ece3.1182/full
-Website: http://martinwestgate.com/sppairs/
-Package authors: Martin Westgate (<martinjwestgate@gmail.com>) & Peter Lane
+Article available here (OA): http://onlinelibrary.wiley.com/doi/10.1002/ece3.1182/full   
+PAckage website: http://martinwestgate.com/sppairs/   
+Package authors: Martin Westgate (<martinjwestgate@gmail.com>) & Peter Lane   
 
 # Example
 
