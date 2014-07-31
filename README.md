@@ -8,8 +8,9 @@ SPAA uses odds ratios to calculate and visualise pairwise associations between s
     bird assemblages" Ecology and Evolution. DOI: 10.1002/ece3.1182
     
 Article available here (OA): http://onlinelibrary.wiley.com/doi/10.1002/ece3.1182/full   
-PAckage website: http://martinwestgate.com/sppairs/   
-Package authors: Martin Westgate (<martinjwestgate@gmail.com>) & Peter Lane   
+Package details:   
+Website: http://martinwestgate.com/sppairs/   
+Authors: Martin Westgate (<martinjwestgate@gmail.com>) and Peter Lane   
 
 # Example
 
