@@ -58,7 +58,7 @@ or.test$combinations[which(or.test$combinations$odds>3), ] # show pairs of speci
 
 # Draw a simple plot
 plot(or.test)
-plot.spaa(or.test, draw.frequencies="none", add.key="none") # Simple version, no key
+plot(or.test, draw.frequencies="none", add.key="none") # Simple version, no key
 
 # Alternatively, calculate point and line values, then plot
 point.coords<-spaa.points(or.test)	# note: igraph gives a different arrangement each time
