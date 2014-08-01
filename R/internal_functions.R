@@ -1,12 +1,17 @@
 # Convert an abundance dataset to presence/absence.
 make.binary<-function(dataset, threshold)
 {
-dataset<-as.data.frame(dataset)
+dataset<-as.data.frame(dataset)	 # avoid errors if single col. entered
 if(missing(threshold)){	# for converting abundance to presence/absence data, this works well
-	for(i in 1: dim(dataset)[2]){if(any(dataset[, i]>0))dataset[which(dataset[, i]>0), i]<-1}
+	dataset<-apply(dataset, 2, function(x){
+		if(any(x>0)){x[which(x>0)]<-1}
+		return(x)})
 }else{	# otherwise, cut by threshold
-	for(i in 1: dim(dataset)[2]){dataset[, i]<-as.numeric(
-		cut(dataset[, i], breaks=c(-Inf, threshold, Inf), include.lowest=TRUE))-1}}
+	dataset<-apply(dataset, 2, function(x){
+		x<-as.numeric(cut(x, breaks=c(-Inf, threshold, Inf), include.lowest=TRUE))-1
+		return(x)})
+	}
+dataset<-as.data.frame(dataset)	# as apply converts dataset to matrix
 return(dataset)
 }
 
