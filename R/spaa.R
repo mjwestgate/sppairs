@@ -62,5 +62,7 @@ output<-list(
 	species=frequency.result,
 	combinations=combinations.final)
 
+class(output)<-"spaa"
+
 return(output)
 }

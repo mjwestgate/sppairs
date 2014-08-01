@@ -1,11 +1,11 @@
-\name{or.lines}
-\alias{or.lines}
+\name{spaa.lines}
+\alias{spaa.lines}
 \title{Line attributes}
 \usage{
-or.lines(dataset, threshold, reduce)
+spaa.lines(dataset, threshold, reduce)
 }
 \arguments{
-  \item{dataset}{output from pairwise.odds.ratios()}
+  \item{dataset}{output from spaa()}
 
   \item{thresold}{odds ratio used to determine groupings}
 
@@ -14,6 +14,6 @@ or.lines(dataset, threshold, reduce)
 }
 \description{
 Function for setting the attributes of lines, to be drawn
-between points given by or.points()
+between points given by spaa.points()
 }
 

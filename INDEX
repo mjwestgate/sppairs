@@ -1,19 +1,20 @@
 make.binary		Convert an abundance dataset to presence/absence
 prop.occupied		Calculate the proportion of rows that are occupied
-odds.ratio.test		Check input datasets for compatability with later functions
+or.check		Check input datasets for compatability with later functions
 or.contingency		Calculate asymmetric odds ratio from a contingency table
-or.regression		Calculate asymmetric odds ratio using logistic regression
-pairwise.odds.ratios	Calculate odds ratios for all pairs of columns (species)
+or.glm			Calculate asymmetric odds ratio using logistic regression
+or.glmer		Calculate asymmetric odds ratio using mixed models
+spaa			Calculate odds ratios for all pairs of columns (species)
+spaa.points		Use igraph to calculate sensible point locations
+spaa.lines		Set line properties for plotting
 pairwise.or.matrix	Converts pairwise.or results from long to wide format
-or.points		Use igraph to calculate sensible point locations
-or.lines		Set line properties for plotting
 lwd.scale		get sensible line widths
 shorten.line		shorten arrow lengths, so that arrowheads are always visible
 arrows.default		draw sensible arrows
 offset.line		perpendicularly offset lines where arrows occur in both directions
-plot.pairs		wrapper function to plot results from or.points and or.lines
-draw.sppairs		draw results from or.points and or.lines without keys
-draw.object.key		set plot behaviour for keys in plot.pairs
+plot.spaa		wrapper function to plot results from or.points and or.lines
+draw.sppairs		draw results from spaa.points and spaa.lines without keys
+draw.object.key		set plot behaviour for keys in plot.spaa
 draw.spp.key		draw a key to species labels in draw.sppairs
 draw.point.key		draw a key to point sizes and colours in draw.sppairs
 draw.line.key		draw a key to line widths and colours in draw.sppairs

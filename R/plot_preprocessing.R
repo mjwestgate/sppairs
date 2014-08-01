@@ -17,7 +17,7 @@ return(output.matrix)
 
 
 # Use igraph to calculate sensible point locations
-or.points<-function(dataset, threshold)
+spaa.points<-function(dataset, threshold)
 {
 library(igraph)
 if(missing(threshold))threshold<-3
@@ -65,7 +65,7 @@ return(points)
 
 
 # Function for setting the attributes of lines, to be drawn between points given by or.points()
-or.lines<-function(dataset, threshold, reduce)
+spaa.lines<-function(dataset, threshold, reduce)
 {
 library(RColorBrewer)
 if(missing(threshold))threshold<-3

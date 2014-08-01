@@ -1,9 +1,17 @@
 # Plot results of pairwise.odds.ratios, using results from or.points and or.lines
-plot.pairs<-function(points, lines, draw.frequencies, add.key)
+plot.spaa<-function(object, draw.frequencies, add.key)
 {
 # set defaults
 if(missing(draw.frequencies))draw.frequencies<-TRUE
 if(missing(add.key))add.key<-"species"
+
+# set behaviour
+if(class(object)=="spaa"){
+	points<-spaa.points(object)
+	lines<-spaa.lines(object)
+} else if(class(object)=="list"){
+	points<-object[[1]]
+	lines<-object[[2]]}
 
 # set error messages
 if(dim(points)[1]==0)stop("Error: no strong inter-species associations identified")

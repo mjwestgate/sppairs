@@ -1,2 +1,7 @@
-export(odds.ratio.test, or.contingency, or.regression,
-pairwise.odds.ratios, or.points, or.lines, plot.pairs)
+export(make.binary, prop.occupied,
+or.contingency, or.glm, or.glmer, 
+spaa, spaa.points, spaa.lines, 
+plot.spaa)
+S3method(plot, spaa)
+S3method(print, spaa)
+S3method(summary, spaa)

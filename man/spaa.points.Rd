@@ -1,11 +1,11 @@
-\name{or.points}
-\alias{or.points}
+\name{spaa.points}
+\alias{spaa.points}
 \title{Point locations}
 \usage{
-or.points(dataset, threshold)
+spaa.points(dataset, threshold)
 }
 \arguments{
-  \item{dataset}{output from pairwise.odds.ratios() (i.e. a
+  \item{dataset}{output from spaa() (i.e. a
   list containing three components)}
 
   \item{thresold}{Odds ratio used to determine whether
