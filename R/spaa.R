@@ -20,7 +20,7 @@ dataset<-dataset[, which(occu.result>rarity.cutoff)]
 # create an object to export frequency information
 frequency.result<-occu.result[which(occu.result>rarity.cutoff)]
 frequency.result<-data.frame(
-	name=names(frequency.result),
+	species=names(frequency.result),
 	frequency=as.numeric(frequency.result),
 	stringsAsFactors=FALSE)
 #frequency.result$species<-as.character(frequency.result$species)

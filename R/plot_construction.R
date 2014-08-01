@@ -19,7 +19,7 @@ if(dim(points)[1]==0)stop("Error: no strong inter-species associations identifie
 switch(add.key,
 	"none"={draw.sppairs(points, lines, draw.frequencies)},
 	"species"={
-		split.screen(matrix(c(0, 0.7, 0, 1, 0.7, 1, 0, 1), nrow=2, ncol=4, byrow=T))	
+		split.screen(matrix(c(0, 0.8, 0, 1, 0.8, 1, 0, 1), nrow=2, ncol=4, byrow=T))	
 		screen(1); draw.sppairs(points, lines, draw.frequencies)
 		screen(2); draw.spp.key(points, draw.frequencies)
 		close.screen(all.screens=TRUE)},
@@ -66,7 +66,7 @@ sp1<-which(points$species==lines$sp1[i])
 sp2<-which(points$species==lines$sp2[i])
 
 # get line coordinates, with reduction in line length proportional to terminal point szie
-if(any(c("size", "both")==draw.frequencies)){
+if(draw.frequencies==TRUE){
 	reduction.thisrun<-(points$freq[sp2]+interpoint.dist)*0.02
 }else{reduction.thisrun<-0.02*interpoint.dist}
 
