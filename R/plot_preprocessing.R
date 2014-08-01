@@ -72,7 +72,7 @@ if(missing(threshold))threshold<-3
 if(missing(reduce))reduce<-TRUE
 
 # make some changes to result.long for plotting lines
-line.data<-dataset$result.long[, 3:5]
+line.data<-dataset$combinations[, 3:5]
 line.data$sp1<-as.character(line.data$sp1)
 line.data$sp2<-as.character(line.data$sp2)
 # remove values outside of threshold range
