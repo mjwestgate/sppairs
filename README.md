@@ -61,8 +61,8 @@ plot(or.test)
 plot(or.test, draw.frequencies="none", add.key="none") # Simple version, no key
 
 # Alternatively, calculate point and line values, then plot
-point.coords<-spaa.points(or.test)	# note: igraph gives a different arrangement each time
+point.coords<-spaa.points(or.test)	# avoids issue whereby igraph gives a different arrangement each time
 line.values<-spaa.lines(or.test)		# sets line properties in a sensible way.
-plot.spaa(list(point.coords, line.values)	# default behaviour (as above)
+plot.spaa(list(point.coords, line.values))	# default behaviour (as above)
 plot.spaa(list(point.coords, line.values), draw.frequencies="both", add.key="both") # with a simple line key as well
 ```
