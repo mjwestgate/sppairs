@@ -10,6 +10,10 @@ if(missing(method)){
 	method <-"contingency"
 	cat("Warning: method 'glmer' not available without specifying 'random.effect'. Switched to method 'contingency'")}
 }
+if(any(c("contingency", "glm", "glmer")==method)==F){	# if method not recognised, set to 
+	cat(paste("Warning: method '", method, "' not recognised. Switching to method 'contingency'", sep=""))
+	method<-"contingency"
+	}
 if(missing(rarity.cutoff))rarity.cutoff<-0.1
 if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
   
