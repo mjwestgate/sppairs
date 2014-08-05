@@ -14,6 +14,7 @@ invisible(dataset)		# return the (possibly corrected) dataset for use in later f
 or.contingency<-function(dataset)	
 {
 dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
+for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
 cont.table <-as.matrix(table(dataset))[2:1, 2:1]
 c<-cont.table[1, 1]; d<-cont.table[1, 2]; e<-cont.table[2, 1]; f<-cont.table[2, 2]
 odds.ratio<-(c/d) / ( (c+e) / (d+f) )
