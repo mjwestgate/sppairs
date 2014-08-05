@@ -16,6 +16,9 @@ if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if 
 # apply rarity cutoff 
 occu.result<-prop.occupied(dataset)
 dataset<-dataset[, which(occu.result>rarity.cutoff)]
+# apply a second cutoff to exclude spp. present at all (or none) of the sites
+dataset<-dataset[, which(c(apply(dataset, 2, sum)==dim(dataset)[1])==FALSE)]	# remove 100% occupied
+dataset<-dataset[, which(c(apply(dataset, 2, function(x){length(which(x==0))})==dim(dataset)[1])==FALSE)]	# 0%
   
 # create an object to export frequency information
 frequency.result<-occu.result[which(occu.result>rarity.cutoff)]
