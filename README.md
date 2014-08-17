@@ -9,7 +9,7 @@ SPAA uses odds ratios to calculate and visualise pairwise associations between s
     
 Article available here (OA): http://onlinelibrary.wiley.com/doi/10.1002/ece3.1182/full   
 Package details:   
-Website: http://martinwestgate.com/sppairs/   
+Website: http://martinwestgate.com/code/sppairs/   
 Authors: Martin Westgate (<martinjwestgate@gmail.com>) and Peter Lane   
 
 # Example
