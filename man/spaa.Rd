@@ -1,8 +1,8 @@
-\name{pairwise.odds.ratios}
-\alias{pairwise.odds.ratios}
+\name{spaa}
+\alias{spaa}
 \title{Pairwise odds ratio calculation}
 \usage{
-pairwise.odds.ratios(dataset, random.effect, rarity.cutoff, quiet)
+spaa(dataset, random.effect, rarity.cutoff, quiet)
 }
 \arguments{
   \item{dataset}{data.frame where each column is a species. Rows can be sites or visits; if visits, a grouping factor is a good idea.}
