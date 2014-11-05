@@ -16,10 +16,9 @@ return(output.matrix)
 }
 
 
-# Use igraph to calculate sensible point locations
+# Use igraph to calculate sensible point locations - NOTE THAT COLOURS/SIZES MOVED
 spaa.points<-function(dataset, threshold)
 {
-library(igraph)
 if(missing(threshold))threshold<-3
 
 # select input data
@@ -44,21 +43,9 @@ if(length(rows)>0)
 
 # get plot coordinates using igraph
 net<-graph.adjacency(result, mode="directed", weighted=TRUE, diag=FALSE)
-layout<-layout.fruchterman.reingold(net)
+layout<-layout.kamada.kawai(net)# layout.fruchterman.reingold(net)
 points<-as.data.frame(cbind(species.results, layout))
 colnames(points)[2:4]<-c("freq", "x", "y")
-
-# set some colours
-bg.list<-brewer.pal(8, "Set2")[c(3, 5, 6, 2, 4)] #c("deepskyblue", "aquamarine", "")
-col.list<-c("blue", "green", "yellow", "orange", "red")
-break.values<-c(0, 0.1, 0.25, 0.5, 0.75, 1)
-
-points$bg<-as.character(cut(points$freq, 
-	breaks= break.values,
-	labels= bg.list))
-points$col<-as.character(cut(points$freq, breaks= break.values,
-	labels= col.list))
-points$cex<-2+(4*points$freq)
 
 return(points)
 }
@@ -67,7 +54,6 @@ return(points)
 # Function for setting the attributes of lines, to be drawn between points given by or.points()
 spaa.lines<-function(dataset, threshold, reduce)
 {
-library(RColorBrewer)
 if(missing(threshold))threshold<-3
 if(missing(reduce))reduce<-TRUE
 
@@ -81,8 +67,8 @@ line.data<-rbind(
 	line.data[line.data$odds>=threshold & line.data$odds<=Inf, ])
 
 # add new columns to line data to allow prettier plots
-line.data<-cbind(line.data, as.data.frame(matrix(data=0, nrow=dim(line.data)[1], ncol=5)))
-colnames(line.data)[4:8]<-c("difference", "arrow.code", "offset", "colour", "width")
+line.data<-cbind(line.data, as.data.frame(matrix(data=0, nrow=dim(line.data)[1], ncol=2)))
+colnames(line.data)[4:5]<-c("difference", "arrow.code") #, "offset", "colour", "width")
 line.data$arrow.code<-2
 
 # run loop to get properties of lines representing strong effects
@@ -105,16 +91,6 @@ if(any(test==TRUE)){
 
 # if required, get rid of excess rows
 if(reduce){if(any(line.data$arrow.code==99)){line.data<-line.data[-which(line.data$arrow.code==99), ]}}
-
-# set colours & widths
-line.breaks<-c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf)
-line.cols<-c("black", brewer.pal(7, "RdBu")[7:1], "magenta")
-line.widths<-c(2, 3, 2, 1, 0, 1, 2, 3, 2)
-line.data$colour<-as.character(cut(line.data$odds,
- 	breaks=line.breaks, labels=line.cols,
-	include.lowest=TRUE))
-line.data$width<-line.widths[as.numeric(as.character(cut(line.data$odds,
- 	breaks=line.breaks, labels=c(1:9), include.lowest=TRUE)))]
 
 return(line.data)
 }

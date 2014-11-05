@@ -1,147 +1,231 @@
+# function to set plot defaults, and overwrite if new data is provided (altered from circleplot)
+	# NOTE: the above does not allow arbitrary point colours as in circleplot.
+set.plot.attributes<-function(
+	input,
+	plot.control,
+	draw.frequencies
+	)
+	{
+
+	# set defaults depending on whether sets use.frequencies or not
+	if(draw.frequencies){
+		point.breaks<-seq(0, 1, 0.2) #c(0, 0.1, 0.25, 0.5, 0.75, 1)
+		point.cols<-brewer.pal(5, "Spectral")[5:1]
+		point.size<-c(2, 4)
+	}else{
+		point.breaks<-c(0, 1); point.cols<-"white"; point.size<-3}
+
+	# set some defaults
+	plot.defaults<-list(
+		point.label="grey30",	# use for boundary and label
+		point.cols=point.cols,
+		point.breaks=point.breaks,
+		point.size=point.size,
+		line.breaks=c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf),
+		line.cols=c("black", brewer.pal(7, "RdBu")[7:1], "magenta"),
+		line.widths=rep(2, 9),
+		key.placement=matrix(data=NA, nrow=1, ncol=4)
+		)
+
+	# overwrite these values where others are provided
+	if(missing(plot.control)==FALSE){
+		names.provided<-names(plot.control)
+		for(i in 1:length(plot.defaults)){
+			if(any(names.provided==names(plot.defaults)[i])){
+			entry.thisrun<-which(names.provided==names(plot.defaults)[i])
+			plot.defaults[[i]]<-plot.control[[entry.thisrun]]
+			}}}
+
+	# set point colours and sizes according to breaks given in plot.defaults
+	# note that these vary categorically, not continuously as before
+	point.categories<-cut(input$points$freq, breaks=plot.defaults$point.breaks, 
+		include.lowest=TRUE, labels=FALSE)
+	input$points$col<-plot.defaults$point.cols[point.categories]
+	if(length(plot.defaults$point.size)==1){plot.defaults$point.size<-rep(plot.defaults$point.size, 2)}
+	point.sizes<-seq(plot.defaults$point.size[1], plot.defaults$point.size[2], 
+		length.out=length(plot.defaults$point.cols))
+	input$points$cex<-point.sizes[point.categories]	
+
+	# set line values
+	line.classes<-cut(input$lines$odds, breaks= plot.defaults$line.breaks, 
+		include.lowest=TRUE, labels=FALSE)
+	input$lines$col<-plot.defaults$line.cols[line.classes]
+	input$lines$lwd<-plot.defaults$line.widths[line.classes]
+
+	# set line order
+	input$lines$order<-input$lines$odds
+	low.rows<-which(input$lines$odds<1)
+	input$lines$order[low.rows]<-1/input$lines$order[low.rows]
+	input$lines<-input$lines[order(input$lines$order, decreasing=FALSE), ]
+
+	# add plot.control to input
+	input$plot.control<-plot.defaults
+
+	return(input)
+	}
+	
+
+
 # Plot results of pairwise.odds.ratios, using results from or.points and or.lines
-plot.spaa<-function(object, draw.frequencies, add.key)
+plot.spaa<-function(object, plot.control, draw.frequencies)
 {
 # set defaults
 if(missing(draw.frequencies))draw.frequencies<-TRUE
-if(missing(add.key))add.key<-"species"
 
 # set behaviour
 if(class(object)=="spaa"){
-	points<-spaa.points(object)
-	lines<-spaa.lines(object)
+	input<-list(
+		points=spaa.points(object),
+		lines=spaa.lines(object))
 } else if(class(object)=="list"){
-	points<-object[[1]]
-	lines<-object[[2]]}
+	input<-object
+	if(length(names(input))==0){name(object)<-c("points", "lines")}
+	}
 
 # set error messages
-if(dim(points)[1]==0)stop("Error: no strong inter-species associations identified")
+if(dim(input$points)[1]==0)stop("Error: no strong inter-species associations identified")
 
-switch(add.key,
-	"none"={draw.sppairs(points, lines, draw.frequencies)},
-	"species"={
-		split.screen(matrix(c(0, 0.8, 0, 1, 0.8, 1, 0, 1), nrow=2, ncol=4, byrow=T))	
-		screen(1); draw.sppairs(points, lines, draw.frequencies)
-		screen(2); draw.spp.key(points, draw.frequencies)
-		close.screen(all.screens=TRUE)},
-	"object"={
-		split.screen(matrix(c(0, 0.8, 0, 1, 0.8, 1, 0, 1), nrow=2, ncol=4, byrow=T))
-		screen(1); draw.sppairs(points, lines, draw.frequencies)
-		screen(2); draw.object.key(draw.frequencies)
-		close.screen(all.screens=TRUE)},
-	"both"={
-		split.screen(matrix(c(0, 0.6, 0, 1, 0.6, 0.8, 0, 1, 0.8, 1, 0, 1), nrow=3, ncol=4, byrow=T))
-		screen(1); draw.sppairs(points, lines, draw.frequencies)
-		screen(2); draw.spp.key(points, draw.frequencies)
-		screen(3); draw.object.key(draw.frequencies)
-		close.screen(all.screens=TRUE)}
-	)
+# set plot attributes
+input<-set.plot.attributes(input, plot.control, draw.frequencies) # set plot attributes/defaults
+
+# set draw behaviour depending on key requests
+if(any(is.na(input$plot.control$key.placement))){draw.sppairs(input)
+}else{
+	place.matrix<-input$plot.control$key.placement
+	command.list<-rownames(place.matrix)
+	split.screen(place.matrix)
+	for(i in 1:dim(place.matrix)[1]){
+		screen(i)
+		switch(command.list[i],
+			network={draw.sppairs(input)},
+			species={draw.spp.key(input)},
+			points={draw.point.key(input)},
+			lines={draw.line.key(input)})
+		}
+	close.screen(all.screens=TRUE)
+	}
 }	# end plot.pairs
 
 
-draw.object.key<-function(draw.frequencies)
-	{
-	if(draw.frequencies){
-		screens<-split.screen(matrix(c(0, 1, 0, 0.5, 0, 1, 0.5, 1), nrow=2, ncol=4, byrow=T))
-		screen(screens[1]); draw.line.key()
-		screen(screens[2]); draw.point.key()
-	}else{draw.line.key()}
-	}
 
 
-
-draw.sppairs<-function(points, lines, draw.frequencies)
+# draw a plot of the netowrk given by sppairs
+draw.sppairs<-function(input)
 {
 # how much should we adjust point sizes etc.?
-interpoint.dist<-mean(c((max(points[, 3])-min(points[, 3])), (max(points[, 4])-min(points[, 4]))))
+interpoint.dist<-mean(c((max(input$point$x)-min(input$points$x)), 
+	(max(input$point$y)-min(input$point$y))))
 
 # set plot region
-par(mar=c(1,1,1,1), cex=0.7)
-plot(x=points$x, y=points$y, type="n", ann=F, axes=F, asp=1)
+par(mar=rep(0.5, 4), cex=0.7)
+plot(x=input$points$x, y=input$points$y, type="n", ann=F, axes=F, asp=1)
 
 # run loop to draw lines showing significant effects
-for(i in 1:dim(lines)[1])
+for(i in 1:dim(input$lines)[1])
 {
 # which species are connected by this line?
-sp1<-which(points$species==lines$sp1[i])
-sp2<-which(points$species==lines$sp2[i])
+sp1<-which(input$points$species==input$lines$sp1[i])
+sp2<-which(input$points$species==input$lines$sp2[i])
 
 # get line coordinates, with reduction in line length proportional to terminal point szie
-if(draw.frequencies==TRUE){
-	reduction.thisrun<-(points$freq[sp2]+interpoint.dist)*0.02
-}else{reduction.thisrun<-0.02*interpoint.dist}
+reduction.thisrun<-(input$points$cex[sp2]+interpoint.dist)*0.02
 
-line.thisrun<-shorten.line(c(x0=points$x[sp1], x1=points$x[sp2],
-	y0=points$y[sp1], y1=points$y[sp2]), 
+line.thisrun<-shorten.line(c(x0=input$points$x[sp1], x1=input$points$x[sp2],
+	y0=input$points$y[sp1], y1=input$points$y[sp2]), 
 	reduction=reduction.thisrun)
-if(lines$arrow.code[i]==3){	# if arrows on both sides, repeat length reduction
+if(input$lines$arrow.code[i]==3){	# if arrows on both sides, repeat length reduction
 	line.thisrun<-shorten.line(c(x0=line.thisrun[2], x1=line.thisrun[1],
 		y0=line.thisrun[4], y1=line.thisrun[3]), 
 		reduction=reduction.thisrun)}
 
-# if unidirectional arrows occur in both directions, offset them. Note: Does not occur by default.
-if(lines$offset[i]==1){line.thisrun<-offset.line(line.thisrun, offset=interpoint.dist*0.01)}
-
 # draw arrows
-arrows.default(line.thisrun, col=lines$colour[i], 
-	lwd=lines$width[i], code=lines$arrow.code[i])
+arrows.default(line.thisrun, col=input$lines$col[i], 
+	lwd=input$lines$lwd[i], code=input$lines$arrow.code[i])
 }
   
 # add numbered points
-if(draw.frequencies==TRUE){
-	points(points$x, points$y, pch=21, bg=points$bg, col=points$col, cex=points$cex)
-}else{
-	points(points$x, points$y, pch=21, bg="white", col="black", cex=3)}
-text(points$x, points$y, labels=c(1: dim(points)[1]), cex=0.7, col="black")
+points(input$points$x, input$points$y, pch=21, bg=input$points$col, 
+	col=input$plot.control$point.label, cex=input$points$cex)
+text(input$points$x, input$points$y, 
+	labels=c(1: dim(input$points)[1]), 	# NOTE: consider changing this for consistency between plots
+	cex=0.7, col=input$plot.control$point.label)
 
 }	# end draw.sppairs()
 
 
 
-draw.spp.key<-function(points, draw.frequencies){
-	par(mar=rep(0, 4), cex=0.6)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, 1.05))
-	text(x=0.1, y=1.05, labels="Species", font=2, pos=4)
-	if(draw.frequencies==TRUE){
-		points(rep(0, dim(points)[1]), seq(1, 0, length.out=dim(points)[1]), 
-		pch=21, bg=points$bg, col=points$col, cex=points$cex)
-	}else{
-		points(rep(0, dim(points)[1]), seq(1, 0, length.out=dim(points)[1]), 
-		pch=21, bg="white", col="black", cex=3)}
-	text(x=0, y=seq(1, 0, length.out=dim(points)[1]), labels=c(1:dim(points)[1]))
-	text(x=0.1, y=seq(1, 0, length.out=dim(points)[1]), labels=points$species, pos=4)	
+# a key to species labels
+draw.spp.key<-function(input){
+	label.size<-max(nchar(input$points$species))
+	if(label.size<10){x.min<-0.8}else{x.min<-0.5}
+
+	# draw plot
+	par(mar=rep(0, 4), cex=0.7)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(x.min, 1.1), ylim=c(0, 1.03))
+	mtext("Species", side=3, font=2, cex=0.6, line=-1, adj=0.5)
+
+	# duplicate points from main figure
+	points(x=rep(1, dim(input$points)[1]), 
+		y=seq(1, 0, length.out=dim(input$points)[1]),
+		pch=21, bg=input$points$col, 
+		col=input$plot.control$point.label, cex=input$points$cex)
+	text(x=1, y=seq(1, 0, length.out=dim(input$points)[1]), 
+		labels=c(1:dim(input$points)[1]), cex=0.7, col=input$plot.control$point.label)
+
+	# add labels
+	text(x=0.95, y=seq(1, 0, length.out=dim(input$points)[1]), 
+		labels=input$points$species, pos=2, cex=0.7)	
 	}
 
 
-draw.point.key<-function(){
-	bg.list<-brewer.pal(8, "Set2")[c(3, 5, 6, 2, 4)] 
-	col.list<-c("blue", "green", "yellow", "orange", "red")
-	break.values<-c(0, 0.1, 0.25, 0.5, 0.75, 1)
-	point.labels<-paste(break.values[1:5], break.values[2:6], sep=" - ")
-	point.cex<-2+(4*break.values[2:6])
 
+# Function to add point key to plot
+draw.point.key<-function(input){
+	# set labels
+	dataset<-input$plot.control
+	nrow<-length(dataset$point.breaks)
+	values<-format(dataset$point.breaks)
+	point.labels<-paste(values[1:(nrow-1)], values[2:nrow], sep=" - ")
+	point.cex<-seq(dataset$point.size[1], dataset$point.size[2], length.out=(nrow-1))	# set point sizes
+	nlines<-nrow-1
+
+	# set up plot
 	par(mar=c(0, 0, 1, 0), cex=0.5)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.2, 1), ylim=c(0.5, 5.5))
-	points(x=rep(0.9, 5), y=c(1:5), pch=21,
-		bg=bg.list, col=col.list, cex=point.cex)
-	text(x=rep(0.8, 5), y=c(1:5), pos=2, cex=1,
-		labels= point.labels)
-	mtext("spp. occurrence", side=3, cex=0.5, adj=0.5)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.5, 1), ylim=c(0.5, nlines+0.5))
+	points(x=rep(0.9, nlines), y=c(1: nlines), pch=21,
+		bg= dataset$point.cols, col=dataset$point.label, cex=point.cex)
+	text(x=rep(0.8, nlines), y=c(1: nlines), pos=2, cex=1, labels=point.labels)
+	mtext("Occupancy", side=3, font=2, cex=0.6, adj=0.5, line=0)
 	}
 
 
-draw.line.key<-function(){
-	library(RColorBrewer)
-	line.breaks<-c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf)
-	line.labels<-c("0", "<1/9", "<1/6", "<1/3", ">3", ">6", ">9", "Inf")
-	line.cols<-c("black", brewer.pal(7, "RdBu")[c(7:5, 3:1)], "magenta")
-	line.widths<-c(2, 3, 2, 1, 1, 2, 3, 2)
+# Function to draw key to lines
+draw.line.key<-function(input){
+	dataset<-input$plot.control
+	nrow<-length(dataset$line.cols)
+
+	# work out how to display odds ratios
+	values<-dataset$line.breaks
+	values2<-c(1/values[values<1], values[values>=1])
+	low.vals<-which(values2<100)
+	high.vals<-which(values2>=100)
+	low.c<-as.character(as.integer(values2[low.vals]))
+	high.c<-as.character(values2[high.vals])
+	simple.values<-c(high.c, low.c)[order(c(high.vals, low.vals))]	
+	# add 1/ to low values
+	neg.vals<-which(values<1)
+	simple.values[neg.vals]<-paste(simple.values[neg.vals], "/1", sep="")
+	if(simple.values[1]=="Inf/1")simple.values[1]<-0
+
+	line.labels<-paste(simple.values[1:nrow], simple.values[2:(nrow+1)], sep=" - ")
+
 	# add plot
-	par(mar=c(0, 3, 0, 0), cex=0.5)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, 9))
-	for(i in 1:8){
-		lines(x=c(0.1, 1), y=rep(c(1:8)[i], 2), 
-			col= line.cols[i], lwd= line.widths[i], lend="butt")}
-	axis(2, at=c(1:8), labels=line.labels, lwd=0, line=-1, cex.axis=1, las=1)
-	mtext("odds ratio", side=3, line=-1.3, cex=0.5, adj=0.5)
+	par(mar=c(0, 3, 1, 0), cex=0.5)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, nrow))
+	for(i in 1: nrow){
+		lines(x=c(0.1, 1), y=rep(c(1: nrow)[i], 2), 
+			col= dataset$line.cols[i], lwd= dataset$line.widths[i], lend="butt")}
+	axis(2, at=c(1:nrow), labels=line.labels, lwd=0, line=-1, cex.axis=1, las=1)
+	mtext("Odds ratio", side=3, font=2, line=0, cex=0.6, adj=0.5)
 	}
 
