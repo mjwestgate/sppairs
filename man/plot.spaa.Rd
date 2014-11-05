@@ -31,7 +31,7 @@ The plot options available have changed substantially from earlier versions of t
     \item{line.breaks}{vector of breaks in species-level occupancy rates used to decide line colours Defaults to seq(0, 1, 0.2) if draw.frequencies=TRUE, else c(0, 1)}
     \item{line.cols}{vector containing colours, either named or in hexadecimal. Used with line.breaks above; length should equal length(line.breaks)-1}
     \item{line.widths}{if given, should provide line widths for each level defined by line.breaks, as for line.cols (above).}
-    \item{text.size}{passed to cex commands in all text options, allowing global scaling of label sizes.}
+    \item{text.size}{length-1 numeric vector passed to cex commands in all text options, allowing global scaling of label sizes.}
     \item{key.placement}{If given, should be a matrix with four columns giving the left, right, bottom and top proportions of the plot window to be used for each section of the plot. Further, the rows (ip to four) should be named with the kind of plot in each section; namely one of 'network' (plotted alone by default) and keys to "species", "points" and/or "lines". This matrix is passed directly to split.screen; help for that command may assist with understanding use of this matrix.}
 }
 }

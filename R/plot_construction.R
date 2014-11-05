@@ -121,32 +121,31 @@ interpoint.dist<-mean(c((max(input$point$x)-min(input$points$x)),
 par(mar=rep(0.5, 4), cex=0.7)
 plot(x=input$points$x, y=input$points$y, type="n", ann=F, axes=F, asp=1)
 
+# work out point sizes
+range.values<-c(max(input$points$x)-min(input$points$x), 
+	max(input$points$y)-min(input$points$y))
+point.size<-max(range.values)*0.01
+input$points$radius<-input$points$cex*point.size
+
 # run loop to draw lines showing significant effects
 for(i in 1:dim(input$lines)[1])
-{
-# which species are connected by this line?
-sp1<-which(input$points$species==input$lines$sp1[i])
-sp2<-which(input$points$species==input$lines$sp2[i])
-
-# get line coordinates, with reduction in line length proportional to terminal point szie
-reduction.thisrun<-(input$points$cex[sp2]+interpoint.dist)*0.02
-
-line.thisrun<-shorten.line(c(x0=input$points$x[sp1], x1=input$points$x[sp2],
-	y0=input$points$y[sp1], y1=input$points$y[sp2]), 
-	reduction=reduction.thisrun)
-if(input$lines$arrow.code[i]==3){	# if arrows on both sides, repeat length reduction
-	line.thisrun<-shorten.line(c(x0=line.thisrun[2], x1=line.thisrun[1],
-		y0=line.thisrun[4], y1=line.thisrun[3]), 
-		reduction=reduction.thisrun)}
-
-# draw arrows
-arrows.default(line.thisrun, col=input$lines$col[i], 
-	lwd=input$lines$lwd[i], code=input$lines$arrow.code[i])
-}
+	{
+	# which species are connected by this line?
+	sp1<-which(input$points$species==input$lines$sp1[i])
+	sp2<-which(input$points$species==input$lines$sp2[i])
+	dataset<-input$points[c(sp1, sp2), ]
+	arrow.points<-find.new.points(dataset)	
+	arrows.default(arrow.points, col=input$lines$col[i], 
+		lwd=input$lines$lwd[i], code=input$lines$arrow.code[i])
+	}
   
-# add numbered points
-points(input$points$x, input$points$y, pch=21, bg=input$points$col, 
-	col=input$plot.control$point.label, cex=input$points$cex)
+# add points
+for(i in 1:dim(input$points)[1]){
+	draw.circle(input$points$x[i], input$points$y[i], 
+		r=input$points$radius[i], 
+		bg=input$points$col[i], 
+		col=input$plot.control$point.label)} 
+# and labels for those points
 text(input$points$x, input$points$y, 
 	labels=c(1: dim(input$points)[1]), 	# NOTE: consider changing this for consistency between plots
 	cex=input$plot.control$text.size, col=input$plot.control$point.label)
@@ -162,8 +161,8 @@ draw.spp.key<-function(input){
 
 	# draw plot
 	par(mar=rep(0, 4), cex=0.7)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(x.min, 1.1), ylim=c(0, 1.03))
-	mtext("Species", side=3, font=2, cex=input$plot.control$text.size, line=-1, adj=0.5)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(x.min, 1.1), ylim=c(0, 1.03), asp=1)
+	mtext("Species", side=3, font=2, cex=input$plot.control$text.size*0.7, line=-1, adj=0.5)
 
 	# duplicate points from main figure
 	points(x=rep(1, dim(input$points)[1]), 
@@ -196,12 +195,12 @@ draw.point.key<-function(input){
 
 	# set up plot
 	par(mar=c(0, 0, 1, 0), cex=0.7)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.5, 1), ylim=c(0.5, nlines+0.5))
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.5, 1), ylim=c(0.5, nlines+0.5), asp=1)
 	points(x=rep(0.9, nlines), y=c(1: nlines), pch=21,
 		bg= dataset$point.cols, col=dataset$point.label, cex=point.cex)
 	text(x=rep(0.8, nlines), y=c(1: nlines), pos=2, 
 		cex=input$plot.control$text.size, labels=point.labels)
-	mtext("Occupancy", side=3, font=2, cex=input$plot.control$text.size, adj=0.5, line=0)
+	mtext("Occupancy", side=3, font=2, cex=input$plot.control$text.size*0.7, adj=0.5, line=0)
 	}
 
 
@@ -233,6 +232,6 @@ draw.line.key<-function(input){
 			col= dataset$line.cols[i], lwd= dataset$line.widths[i], lend="butt")}
 	axis(2, at=c(1:nrow), labels=line.labels, lwd=0, line=-1, 
 		cex.axis=input$plot.control$text.size, las=1)
-	mtext("Odds ratio", side=3, font=2, line=0, cex=input$plot.control$text.size, adj=0.5)
+	mtext("Odds ratio", side=3, font=2, line=0, cex=input$plot.control$text.size*0.7, adj=0.5)
 	}
 
