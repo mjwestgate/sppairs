@@ -24,6 +24,7 @@ set.plot.attributes<-function(
 		line.breaks=c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf),
 		line.cols=c("black", brewer.pal(7, "RdBu")[7:1], "magenta"),
 		line.widths=rep(2, 9),
+		text.size=0.7,
 		key.placement=matrix(data=NA, nrow=1, ncol=4)
 		)
 
@@ -148,7 +149,7 @@ points(input$points$x, input$points$y, pch=21, bg=input$points$col,
 	col=input$plot.control$point.label, cex=input$points$cex)
 text(input$points$x, input$points$y, 
 	labels=c(1: dim(input$points)[1]), 	# NOTE: consider changing this for consistency between plots
-	cex=0.7, col=input$plot.control$point.label)
+	cex=input$plot.control$text.size, col=input$plot.control$point.label)
 
 }	# end draw.sppairs()
 
@@ -162,7 +163,7 @@ draw.spp.key<-function(input){
 	# draw plot
 	par(mar=rep(0, 4), cex=0.7)
 	plot(1~1, ann=F, axes=F, type="n", xlim=c(x.min, 1.1), ylim=c(0, 1.03))
-	mtext("Species", side=3, font=2, cex=0.6, line=-1, adj=0.5)
+	mtext("Species", side=3, font=2, cex=input$plot.control$text.size, line=-1, adj=0.5)
 
 	# duplicate points from main figure
 	points(x=rep(1, dim(input$points)[1]), 
@@ -170,11 +171,15 @@ draw.spp.key<-function(input){
 		pch=21, bg=input$points$col, 
 		col=input$plot.control$point.label, cex=input$points$cex)
 	text(x=1, y=seq(1, 0, length.out=dim(input$points)[1]), 
-		labels=c(1:dim(input$points)[1]), cex=0.7, col=input$plot.control$point.label)
+		labels=c(1:dim(input$points)[1]), 
+		cex=input$plot.control$text.size, 
+		col=input$plot.control$point.label)
 
 	# add labels
 	text(x=0.95, y=seq(1, 0, length.out=dim(input$points)[1]), 
-		labels=input$points$species, pos=2, cex=0.7)	
+		labels=input$points$species, 
+		cex=input$plot.control$text.size,
+		pos=2)	
 	}
 
 
@@ -190,12 +195,13 @@ draw.point.key<-function(input){
 	nlines<-nrow-1
 
 	# set up plot
-	par(mar=c(0, 0, 1, 0), cex=0.5)
+	par(mar=c(0, 0, 1, 0), cex=0.7)
 	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.5, 1), ylim=c(0.5, nlines+0.5))
 	points(x=rep(0.9, nlines), y=c(1: nlines), pch=21,
 		bg= dataset$point.cols, col=dataset$point.label, cex=point.cex)
-	text(x=rep(0.8, nlines), y=c(1: nlines), pos=2, cex=1, labels=point.labels)
-	mtext("Occupancy", side=3, font=2, cex=0.6, adj=0.5, line=0)
+	text(x=rep(0.8, nlines), y=c(1: nlines), pos=2, 
+		cex=input$plot.control$text.size, labels=point.labels)
+	mtext("Occupancy", side=3, font=2, cex=input$plot.control$text.size, adj=0.5, line=0)
 	}
 
 
@@ -220,12 +226,13 @@ draw.line.key<-function(input){
 	line.labels<-paste(simple.values[1:nrow], simple.values[2:(nrow+1)], sep=" - ")
 
 	# add plot
-	par(mar=c(0, 3, 1, 0), cex=0.5)
+	par(mar=c(0, 3, 1, 0), cex=0.7)
 	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, nrow))
 	for(i in 1: nrow){
 		lines(x=c(0.1, 1), y=rep(c(1: nrow)[i], 2), 
 			col= dataset$line.cols[i], lwd= dataset$line.widths[i], lend="butt")}
-	axis(2, at=c(1:nrow), labels=line.labels, lwd=0, line=-1, cex.axis=1, las=1)
-	mtext("Odds ratio", side=3, font=2, line=0, cex=0.6, adj=0.5)
+	axis(2, at=c(1:nrow), labels=line.labels, lwd=0, line=-1, 
+		cex.axis=input$plot.control$text.size, las=1)
+	mtext("Odds ratio", side=3, font=2, line=0, cex=input$plot.control$text.size, adj=0.5)
 	}
 

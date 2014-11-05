@@ -64,5 +64,21 @@ plot(or.test, draw.frequencies="none", add.key="none") # Simple version, no key
 point.coords<-spaa.points(or.test)	# avoids issue whereby igraph gives a different arrangement each time
 line.values<-spaa.lines(or.test)		# sets line properties in a sensible way.
 plot.spaa(list(point.coords, line.values))	# default behaviour (as above)
-plot.spaa(list(point.coords, line.values), draw.frequencies="both", add.key="both") # with a simple line key as well
+
+# Customize plot appearance
+key.matrix<-matrix(data=c(
+0, 0.85, 0, 1,
+0.85, 1, 0, 1,
+0, 0.2, 0.02, 0.32,	# 1. bottom left	
+0.18, 0.40, 0.02, 0.22),
+nrow=4, ncol=4, byrow=TRUE)
+rownames(key.matrix)<-c("network", "species", "points", "lines")
+
+plot.spaa(list(point.coords, line.values), plot.control=list(
+key.placement=key.matrix,
+line.cols=brewer.pal(5, "Blues")[2:5],
+line.breaks=c(3, 5, 7, 9, Inf),
+line.widths=rep(2, 4),	# note: length(line.widths) must = length(line.cols)
+point.breaks=c(0, 0.2, 0.3, 0.4, 0.5, 1))
+)
 ```
