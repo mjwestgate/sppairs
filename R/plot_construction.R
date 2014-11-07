@@ -11,7 +11,7 @@ set.plot.attributes<-function(
 	if(draw.frequencies){
 		point.breaks<-seq(0, 1, 0.2) #c(0, 0.1, 0.25, 0.5, 0.75, 1)
 		point.cols<-brewer.pal(5, "Spectral")[5:1]
-		point.size<-seq(0.5, 1.5, length.out=5)
+		point.size<-seq(1, 2, length.out=5)
 	}else{
 		point.breaks<-c(0, 1); point.cols<-"white"; point.size<-1}
 
