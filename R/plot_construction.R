@@ -15,12 +15,18 @@ set.plot.attributes<-function(
 	}else{
 		point.breaks<-c(0, 1); point.cols<-"white"; point.size<-3}
 
+	# work out point sizes
+	range.values<-c(max(input$points$x)-min(input$points$x), 
+		max(input$points$y)-min(input$points$y))
+	point.unit<-max(range.values)*0.01
+
 	# set some defaults
 	plot.defaults<-list(
 		point.label="grey30",	# use for boundary and label
 		point.cols=point.cols,
 		point.breaks=point.breaks,
 		point.size=point.size,
+		point.unit= point.unit,
 		line.breaks=c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf),
 		line.cols=c("black", brewer.pal(7, "RdBu")[7:1], "magenta"),
 		line.widths=rep(2, 9),
@@ -42,10 +48,11 @@ set.plot.attributes<-function(
 	point.categories<-cut(input$points$freq, breaks=plot.defaults$point.breaks, 
 		include.lowest=TRUE, labels=FALSE)
 	input$points$col<-plot.defaults$point.cols[point.categories]
-	if(length(plot.defaults$point.size)==1){plot.defaults$point.size<-rep(plot.defaults$point.size, 2)}
-	point.sizes<-seq(plot.defaults$point.size[1], plot.defaults$point.size[2], 
-		length.out=length(plot.defaults$point.cols))
-	input$points$cex<-point.sizes[point.categories]	
+	#if(length(plot.defaults$point.size)==1){plot.defaults$point.size<-rep(plot.defaults$point.size, 2)}
+	#point.sizes<-seq(plot.defaults$point.size[1], plot.defaults$point.size[2], 
+	#	length.out=length(plot.defaults$point.cols))	# change to make line.width and point.size behaviour the same
+	input$points$cex<-plot.defaults$point.size[point.categories]	
+	input$points$radius<-input$points$cex*point.unit
 
 	# set line values
 	line.classes<-cut(input$lines$odds, breaks= plot.defaults$line.breaks, 
@@ -121,12 +128,6 @@ interpoint.dist<-mean(c((max(input$point$x)-min(input$points$x)),
 par(mar=rep(0.5, 4), cex=0.7)
 plot(x=input$points$x, y=input$points$y, type="n", ann=F, axes=F, asp=1)
 
-# work out point sizes
-range.values<-c(max(input$points$x)-min(input$points$x), 
-	max(input$points$y)-min(input$points$y))
-point.size<-max(range.values)*0.01
-input$points$radius<-input$points$cex*point.size
-
 # run loop to draw lines showing significant effects
 for(i in 1:dim(input$lines)[1])
 	{
@@ -159,23 +160,33 @@ draw.spp.key<-function(input){
 	label.size<-max(nchar(input$points$species))
 	if(label.size<10){x.min<-0.8}else{x.min<-0.5}
 
+	# work out y values
+	y.key<-rep(0, dim(input$points)[1])
+	for(i in 2:dim(input$points)[1]){
+		y.key[i]<-y.key[(i-1)]+sum(c(input$points$radius[c((i-1), i)], input$plot.control$point.unit*0.5))}
+	y.key<-max(y.key)-y.key
+	y.min<-0-input$points$radius[dim(input$points)[1]]
+	y.max<-max(y.key)+input$points$radius[1]
+
 	# draw plot
 	par(mar=rep(0, 4), cex=0.7)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(x.min, 1.1), ylim=c(0, 1.03), asp=1)
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(x.min, 1.1), ylim=c(y.min, y.max), asp=1)
 	mtext("Species", side=3, font=2, cex=input$plot.control$text.size*0.7, line=-1, adj=0.5)
 
-	# duplicate points from main figure
-	points(x=rep(1, dim(input$points)[1]), 
-		y=seq(1, 0, length.out=dim(input$points)[1]),
-		pch=21, bg=input$points$col, 
-		col=input$plot.control$point.label, cex=input$points$cex)
-	text(x=1, y=seq(1, 0, length.out=dim(input$points)[1]), 
+	# add points
+	for(i in 1:dim(input$points)[1]){
+		draw.circle(x=1, y=y.key[i], 
+			r=input$points$radius[i], 
+			bg=input$points$col[i], 
+			col=input$plot.control$point.label)} 
+	# and labels for those points
+	text(x=1, y=y.key,
 		labels=c(1:dim(input$points)[1]), 
 		cex=input$plot.control$text.size, 
 		col=input$plot.control$point.label)
 
-	# add labels
-	text(x=0.95, y=seq(1, 0, length.out=dim(input$points)[1]), 
+	# add descriptions
+	text(x=(1-max(input$points$radius)), y=y.key, 
 		labels=input$points$species, 
 		cex=input$plot.control$text.size,
 		pos=2)	
@@ -185,23 +196,40 @@ draw.spp.key<-function(input){
 
 # Function to add point key to plot
 draw.point.key<-function(input){
+
 	# set labels
-	dataset<-input$plot.control
-	nrow<-length(dataset$point.breaks)
-	values<-format(dataset$point.breaks)
+	# dataset<-input$plot.control
+	nrow<-length(input$plot.control$point.breaks)
+	values<-format(input$plot.control$point.breaks)
 	point.labels<-paste(values[1:(nrow-1)], values[2:nrow], sep=" - ")
-	point.cex<-seq(dataset$point.size[1], dataset$point.size[2], length.out=(nrow-1))	# set point sizes
-	nlines<-nrow-1
+	npoints<-nrow-1
+
+	# work out y values
+	y.key<-rep(0, npoints)
+	point.radii<-input$plot.control$point.size*input$plot.control$point.unit
+	for(i in 2:npoints){
+		y.key[i]<-y.key[(i-1)]+sum(c(point.radii[c((i-1), i)], input$plot.control$point.unit*0.5))}
+	y.key<-max(y.key)-y.key
+	y.min<-0-point.radii[length(point.radii)]
+	y.max<-max(y.key)+point.radii[1]
+	x.max<-1+max(point.radii)
 
 	# set up plot
 	par(mar=c(0, 0, 1, 0), cex=0.7)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.5, 1), ylim=c(0.5, nlines+0.5), asp=1)
-	points(x=rep(0.9, nlines), y=c(1: nlines), pch=21,
-		bg= dataset$point.cols, col=dataset$point.label, cex=point.cex)
-	text(x=rep(0.8, nlines), y=c(1: nlines), pos=2, 
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0.5, x.max), ylim=c(y.min, y.max), asp=1)
+
+	# add points
+	for(i in 1:npoints){
+		draw.circle(x=1, y=y.key[i], 
+			r= point.radii[i], 
+			bg=input$plot.control$point.cols[i], 
+			col=input$plot.control$point.label)} 
+
+	text(x=(1-max(point.radii)), y= y.key, pos=2, 
 		cex=input$plot.control$text.size, labels=point.labels)
 	mtext("Occupancy", side=3, font=2, cex=input$plot.control$text.size*0.7, adj=0.5, line=0)
 	}
+
 
 
 # Function to draw key to lines
