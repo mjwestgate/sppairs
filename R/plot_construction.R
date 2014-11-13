@@ -22,6 +22,7 @@ set.plot.attributes<-function(
 
 	# set some defaults
 	plot.defaults<-list(
+		threshold=3,
 		point.label="grey30",	# use for boundary and label
 		point.cols=point.cols,
 		point.breaks=point.breaks,
@@ -82,9 +83,12 @@ if(missing(draw.frequencies))draw.frequencies<-TRUE
 
 # set behaviour
 if(class(object)=="spaa"){
+
+	if(missing(plot.control$threshold)){threshold<-3
+	}else{threshold<-plot.control$threshold}
 	input<-list(
-		points=spaa.points(object),
-		lines=spaa.lines(object))
+		points=spaa.points(object, threshold),
+		lines=spaa.lines(object, threshold))
 } else if(class(object)=="list"){
 	input<-object
 	if(length(names(input))==0){name(object)<-c("points", "lines")}
