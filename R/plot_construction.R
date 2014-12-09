@@ -91,7 +91,7 @@ if(class(object)=="spaa"){
 		lines=spaa.lines(object, threshold))
 } else if(class(object)=="list"){
 	input<-object
-	if(length(names(input))==0){name(object)<-c("points", "lines")}
+	if(length(names(input))==0){names(object)<-c("points", "lines")}
 	}
 
 # set error messages
