@@ -48,7 +48,8 @@ hist(or.test$species$frequency,
 # Histogram of odds ratios
 hist(or.test$combinations$odds,
 	las=1,
-	breaks=c(c(0,xlim=c(0, 4),  0.333, 0.666), 0, seq(1, 4, 0.5), Inf), 
+	breaks=c(c(0,  0.333, 0.666), seq(1, 4, 0.5), Inf), 
+    xlim=c(0, 4),
 	xlab="odds ratio", main="Results of pairwise.odds.ratio() for all sites and spp.")
 # how many spp. in each indicator category?
 length(which(or.test$combinations$odds>3))	#  n pairs of significant indicators
@@ -58,7 +59,7 @@ or.test$combinations[which(or.test$combinations$odds>3), ] # show pairs of speci
 
 # Draw a simple plot
 plot(or.test)
-plot(or.test, draw.frequencies="none", add.key="none") # Simple version, no key
+plot(or.test, draw.frequencies=FALSE) # Simple version
 
 # Alternatively, calculate point and line values, then plot
 point.coords<-spaa.points(or.test)	# avoids issue whereby igraph gives a different arrangement each time
