@@ -84,7 +84,7 @@ if(missing(draw.frequencies))draw.frequencies<-TRUE
 # set behaviour
 if(class(object)=="spaa"){
 
-	if(missing(plot.control$threshold)){threshold<-3
+	if(length(plot.control$threshold)==0){threshold<-3
 	}else{threshold<-plot.control$threshold}
 	input<-list(
 		points=spaa.points(object, threshold),
