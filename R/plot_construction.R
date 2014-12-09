@@ -81,11 +81,13 @@ plot.spaa<-function(object, plot.control, draw.frequencies)
 # set defaults
 if(missing(draw.frequencies))draw.frequencies<-TRUE
 
-# set behaviour
+# set behaviour for different inputs
 if(class(object)=="spaa"){
-
-	if(length(plot.control$threshold)==0){threshold<-3
-	}else{threshold<-plot.control$threshold}
+	if(missing(plot.control)){threshold<-3
+	}else{
+		if(length(plot.control$threshold==0)){threshold<-3
+		}else{threshold<-plot.control$threshold}
+	}
 	input<-list(
 		points=spaa.points(object, threshold),
 		lines=spaa.lines(object, threshold))
