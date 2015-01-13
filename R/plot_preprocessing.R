@@ -16,24 +16,83 @@ return(output.matrix)
 }
 
 
-# Use igraph to calculate sensible point locations - NOTE THAT COLOURS/SIZES MOVED
+
+# create a function to run inside spaa.points that calculates point adjacency
+adjacency.test<-function(dataset,	# must be a single spaa() result
+	species.list # if given, a list of species to determine output matrix dimensions an colnames
+	)
+	{
+	# select input data
+	or.matrix<-pairwise.or.matrix(dataset$combinations)	# extract wide-format odds ratios from input data
+	
+	# add extra rows/columns if necessary
+	if(missing(species.list)==FALSE){
+		corrected.matrix<-matrix(data=NA, nrow=length(species.list), ncol=length(species.list))
+		rownames(corrected.matrix)<-species.list
+		colnames(corrected.matrix)<-species.list
+		for(i in 1:length(species.list)){
+			if(any(colnames(or.matrix)==species.list[i])){
+				col<-which(colnames(or.matrix)==species.list[i])
+				data.thisrun<-data.frame(species=rownames(or.matrix), value=or.matrix[, col], stringsAsFactors=FALSE)
+				corrected.matrix[, i]<-as.numeric(
+					merge(data.frame(species=species.list, stringsAsFactors=FALSE), 
+					data.thisrun, by="species", all=TRUE)$value)
+			}}
+		or.matrix<-corrected.matrix
+	}
+					
+	# ID interacting spp.
+	result.positive<-make.binary(or.matrix, threshold=threshold)	# positively-interacting species
+	# and for contra-indicators
+	lower.threshold<-(1/threshold)
+	or.matrix.neg<-(lower.threshold-or.matrix)
+	result.negative<-make.binary(or.matrix.neg, threshold=0)
+	
+	# combine -ve and +ve results into one matrix; ID most strongly interacting spp.
+	result<-as.matrix(result.positive)+ as.matrix(result.negative)
+	return(result)
+	}
+
+
+
+# Use igraph to calculate sensible point locations for one or more spaa objects
 spaa.points<-function(dataset, threshold)
 {
 if(missing(threshold))threshold<-3
 
-# select input data
-species.results<-dataset$species	# what are the species we are looking at?
-or.matrix<-pairwise.or.matrix(dataset$combinations)	# extract wide-format odds ratios from input data
+# run code for a single spaa result
+if(class(dataset)=="spaa"){
+	species.results<-dataset$species	# what are the species we are looking at?
+	result<-adjacency.test(dataset)
+}else{if(class(dataset)=="list"){
+	
+	n.inputs<-length(dataset)
 
-# ID interacting spp.
-result.positive<-make.binary(or.matrix, threshold=threshold)	# positively-interacting species
-# and for contra-indicators
-lower.threshold<-(1/threshold)
-or.matrix.neg<-(lower.threshold-or.matrix)
-result.negative<-make.binary(or.matrix.neg, threshold=0)
+	# get species list & mean frequency
+	species.data<-list()
+	for(i in 1: n.inputs){species.data[[i]]<-dataset[[i]]$species}
+	species.list<-list()
+	for(i in 1: n.inputs){species.list[[i]]<-species.data[[i]]$species}	
+	species.list<-sort(unique(unlist(species.list)))
+	n.species<-length(species.list)
+	species.results<-data.frame(species=species.list, frequency=0, stringsAsFactors=FALSE)
+	for(i in 1:n.inputs){
+		colnames(species.data[[i]])[2]<-paste("x", i, sep="")
+		species.results<-merge(species.results, species.data[[i]], by="species", all=TRUE)}
+	species.results$frequency<-apply(species.results[, c(3:dim(species.results)[2])], 1, 
+		FUN=function(x){mean(x, na.rm=TRUE)})
+	species.results<-species.results[, 1:2]
 
-# combine -ve and +ve results into one matrix; ID most strongly interacting spp.
-result<-as.matrix(result.positive)+ as.matrix(result.negative)
+	# calculate adjacency
+	distance.array<-array(data=NA, dim=c(n.species, n.species, n.inputs), 
+		dimnames=list(species.list, species.list, c(1:n.inputs)))
+	for(i in 1:n.inputs){distance.array[, , i]<-adjacency.test(dataset[[i]], species.list)}
+	result<-matrix(data=NA, nrow=n.species, ncol=n.species)
+		colnames(result)<-species.list
+	for(i in 1:n.species){result[, i]<-apply(distance.array[, i, ], 1, FUN=function(x){sum(x, na.rm=TRUE)})}
+}}	# end list code
+
+# remove uninformative spp
 result.freq<-apply(
 	cbind(colSums(result, na.rm=TRUE), rowSums(result, na.rm=TRUE)), 1, sum)
 rows<-which(result.freq==0)
