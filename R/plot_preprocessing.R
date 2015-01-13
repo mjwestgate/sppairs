@@ -19,7 +19,8 @@ return(output.matrix)
 
 # create a function to run inside spaa.points that calculates point adjacency
 adjacency.test<-function(dataset,	# must be a single spaa() result
-	species.list # if given, a list of species to determine output matrix dimensions an colnames
+	threshold,
+	species.list  # if given, a list of species to determine output matrix dimensions an colnames
 	)
 	{
 	# select input data
@@ -63,7 +64,7 @@ if(missing(threshold))threshold<-3
 # run code for a single spaa result
 if(class(dataset)=="spaa"){
 	species.results<-dataset$species	# what are the species we are looking at?
-	result<-adjacency.test(dataset)
+	result<-adjacency.test(dataset, threshold)
 }else{if(class(dataset)=="list"){
 	
 	n.inputs<-length(dataset)
@@ -86,7 +87,7 @@ if(class(dataset)=="spaa"){
 	# calculate adjacency
 	distance.array<-array(data=NA, dim=c(n.species, n.species, n.inputs), 
 		dimnames=list(species.list, species.list, c(1:n.inputs)))
-	for(i in 1:n.inputs){distance.array[, , i]<-adjacency.test(dataset[[i]], species.list)}
+	for(i in 1:n.inputs){distance.array[, , i]<-adjacency.test(dataset[[i]], threshold, species.list)}
 	result<-matrix(data=NA, nrow=n.species, ncol=n.species)
 		colnames(result)<-species.list
 	for(i in 1:n.species){result[, i]<-apply(distance.array[, i, ], 1, FUN=function(x){sum(x, na.rm=TRUE)})}

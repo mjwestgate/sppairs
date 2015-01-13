@@ -5,8 +5,7 @@
 spaa.points(dataset, threshold)
 }
 \arguments{
-  \item{dataset}{output from spaa() (i.e. a
-  list containing three components)}
+  \item{dataset}{either an output from spaa(), or a list containing >1 of the same.}
 
   \item{thresold}{Odds ratio used to determine whether
   pairs of taxa should be plotted. Both positive (x) and
