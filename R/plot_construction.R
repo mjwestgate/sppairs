@@ -73,7 +73,7 @@ set.plot.attributes<-function(
 	input$lines<-input$lines[order(input$lines$order, decreasing=FALSE), ]
 
 	# append unit size to plot.control
-	plot.control<-append(plot.control, list(point.unit= point.unit)) # should not be note available to users
+	plot.defaults<-append(plot.defaults, list(point.unit= point.unit)) # should not be note available to users
 
 	# EXPORT
 	# add plot.control to input
