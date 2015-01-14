@@ -54,7 +54,7 @@ set.plot.attributes<-function(
 	if(length(plot.defaults$point.cols)==1){
 		plot.defaults$point.cols<-rep(plot.defaults$point.cols, length(plot.defaults$point.breaks)-1)}
 	if(length(plot.defaults$line.widths)==1){
-		plot.defaults$point.cols<-rep(plot.defaults$line.widths, length(plot.defaults$line.breaks)-1)}
+		plot.defaults$line.widths<-rep(plot.defaults$line.widths, length(plot.defaults$line.breaks)-1)}
 
 	# cut point values as needed
 	point.categories<-cut(input$points$freq, breaks=plot.defaults$point.breaks, 
