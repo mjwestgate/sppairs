@@ -24,9 +24,8 @@ adjacency.test<-function(dataset,	# must be a single spaa() result
 	)
 	{
 	# select input data
-	if(missing(species.list)){
-		or.matrix<-pairwise.or.matrix(dataset$combinations)	# extract wide-format odds ratios from input data
-	}else{ 	# add extra rows/columns if necessary
+	or.matrix<-pairwise.or.matrix(dataset$combinations)	# extract wide-format odds ratios from input data
+	if(missing(species.list)==FALSE){
 		corrected.matrix<-matrix(data=NA, nrow=length(species.list), ncol=length(species.list))
 		rownames(corrected.matrix)<-species.list
 		colnames(corrected.matrix)<-species.list
@@ -39,7 +38,7 @@ adjacency.test<-function(dataset,	# must be a single spaa() result
 					data.thisrun, by="species", all=TRUE)$value)
 			}}
 		or.matrix<-corrected.matrix
-	}
+	}	# end else
 
 	# ID interacting spp.
 	result.positive<-make.binary(or.matrix, threshold=threshold)	# positively-interacting species
