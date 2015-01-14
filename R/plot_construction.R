@@ -92,7 +92,8 @@ if(missing(draw.frequencies))draw.frequencies<-TRUE
 
 # set behaviour for different inputs
 if(class(object)=="spaa"){
-	if(missing(plot.control)){threshold<-3
+	if(missing(plot.control)){
+		threshold<-3
 	}else{
 		if(length(plot.control$threshold)==0){threshold<-3
 		}else{threshold<-plot.control$threshold}
@@ -100,10 +101,10 @@ if(class(object)=="spaa"){
 	input<-list(
 		points=spaa.points(object, threshold),
 		lines=spaa.lines(object, threshold))
-} else if(class(object)=="list"){
+}else{if(class(object)=="list"){
 	input<-object
 	if(length(names(input))==0){names(input)<-c("points", "lines")}
-	}
+	}}
 
 # set error messages
 if(dim(input$points)[1]==0)stop("Error: no strong inter-species associations identified")
