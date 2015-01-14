@@ -30,7 +30,7 @@ set.plot.attributes<-function(
 		point.size=point.size,
 		line.breaks=c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf),
 		line.cols=c("black", brewer.pal(7, "RdBu")[7:1], "magenta"),
-		line.widths=rep(2, 9),
+		line.widths=rep(1.5, 9),
 		text.size=0.7,
 		key.placement=matrix(data=NA, nrow=1, ncol=4)
 		)
@@ -46,12 +46,15 @@ set.plot.attributes<-function(
 			}}}
 
 	# ERROR CATCHING
-	# allow single values as inputs to point.size, point.cols, point.label
+	# allow 'global' setting of point and line attributes,
+	# via single values as inputs to point.size, point.cols, point.label, line.width
 	if(length(plot.defaults$point.label)==1){plot.defaults$point.label<-rep(plot.defaults$point.label, 2)}
 	if(length(plot.defaults$point.size)==1){
-		plot.defaults$point.size<-rep(plot.defaults$point.size, length(plot.defaults$point.breaks))}
+		plot.defaults$point.size<-rep(plot.defaults$point.size, length(plot.defaults$point.breaks)-1)}
 	if(length(plot.defaults$point.cols)==1){
-		plot.defaults$point.cols<-rep(plot.defaults$point.cols, length(plot.defaults$point.breaks))}
+		plot.defaults$point.cols<-rep(plot.defaults$point.cols, length(plot.defaults$point.breaks)-1)}
+	if(length(plot.defaults$line.widths)==1){
+		plot.defaults$point.cols<-rep(plot.defaults$line.widths, length(plot.defaults$line.breaks)-1)}
 
 	# cut point values as needed
 	point.categories<-cut(input$points$freq, breaks=plot.defaults$point.breaks, 
