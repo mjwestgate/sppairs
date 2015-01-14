@@ -7,7 +7,8 @@ set.plot.attributes<-function(
 	)
 	{
 
-	# set defaults depending on whether sets use.frequencies or not
+	# SET DEFAULTS
+	# depending on whether sets use.frequencies or not
 	if(draw.frequencies){
 		point.breaks<-seq(0, 1, 0.2) #c(0, 0.1, 0.25, 0.5, 0.75, 1)
 		point.cols<-brewer.pal(5, "Spectral")[5:1]
@@ -23,11 +24,10 @@ set.plot.attributes<-function(
 	# set some defaults
 	plot.defaults<-list(
 		threshold=3,
-		point.label="grey30",	# use for boundary and label
+		point.label=rep("grey30", 2),	# point border and label colour, in that order; or a single value
 		point.cols=point.cols,
 		point.breaks=point.breaks,
 		point.size=point.size,
-		point.unit= point.unit,
 		line.breaks=c(0, 0.000001, 1/9, 1/6, 1/3, 3, 6, 9, 10^8, Inf),
 		line.cols=c("black", brewer.pal(7, "RdBu")[7:1], "magenta"),
 		line.widths=rep(2, 9),
@@ -35,6 +35,7 @@ set.plot.attributes<-function(
 		key.placement=matrix(data=NA, nrow=1, ncol=4)
 		)
 
+	# USER CONTROL
 	# overwrite these values where others are provided
 	if(missing(plot.control)==FALSE){
 		names.provided<-names(plot.control)
@@ -44,14 +45,18 @@ set.plot.attributes<-function(
 			plot.defaults[[i]]<-plot.control[[entry.thisrun]]
 			}}}
 
-	# set point colours and sizes according to breaks given in plot.defaults
-	# note that these vary categorically, not continuously as before
+	# ERROR CATCHING
+	# allow single values as inputs to point.size, point.cols, point.label
+	if(length(plot.defaults$point.label)==1){plot.defaults$point.label<-rep(plot.defaults$point.label, 2)}
+	if(length(plot.defaults$point.size)==1){
+		plot.defaults$point.size<-rep(plot.defaults$point.size, length(plot.defaults$point.breaks))}
+	if(length(plot.defaults$point.cols)==1){
+		plot.defaults$point.cols<-rep(plot.defaults$point.cols, length(plot.defaults$point.breaks))}
+
+	# cut point values as needed
 	point.categories<-cut(input$points$freq, breaks=plot.defaults$point.breaks, 
 		include.lowest=TRUE, labels=FALSE)
 	input$points$col<-plot.defaults$point.cols[point.categories]
-	#if(length(plot.defaults$point.size)==1){plot.defaults$point.size<-rep(plot.defaults$point.size, 2)}
-	#point.sizes<-seq(plot.defaults$point.size[1], plot.defaults$point.size[2], 
-	#	length.out=length(plot.defaults$point.cols))	# change to make line.width and point.size behaviour the same
 	input$points$cex<-plot.defaults$point.size[point.categories]	
 	input$points$radius<-input$points$cex*point.unit
 
@@ -67,6 +72,10 @@ set.plot.attributes<-function(
 	input$lines$order[low.rows]<-1/input$lines$order[low.rows]
 	input$lines<-input$lines[order(input$lines$order, decreasing=FALSE), ]
 
+	# append unit size to plot.control
+	plot.control<-append(plot.control, list(point.unit= point.unit)) # should not be note available to users
+
+	# EXPORT
 	# add plot.control to input
 	input$plot.control<-plot.defaults
 
@@ -151,11 +160,11 @@ for(i in 1:dim(input$points)[1]){
 	draw.circle(input$points$x[i], input$points$y[i], 
 		r=input$points$radius[i], 
 		bg=input$points$col[i], 
-		col=input$plot.control$point.label)} 
+		col=input$plot.control$point.label[1])} 
 # and labels for those points
 text(input$points$x, input$points$y, 
 	labels=c(1: dim(input$points)[1]), 	# NOTE: consider changing this for consistency between plots
-	cex=input$plot.control$text.size, col=input$plot.control$point.label)
+	cex=input$plot.control$text.size, col=input$plot.control$point.label[2])
 
 }	# end draw.sppairs()
 
