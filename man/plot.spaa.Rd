@@ -1,25 +1,23 @@
 \name{plot.spaa}
 \alias{plot.spaa}
-\title{Basic sppairs plot}
+\title{Network diagram of species pairwise associations}
 \usage{
 plot.spaa(object, plot.control, draw.frequencies)
 }
 \arguments{
-  \item{object}{either an 'spaa' object (produced by command 'spaa'), or a (preferably named) list containing two data.frames giving giving point and line attributes.}
+  \item{object}{either an 'spaa' object (produced by command 'spaa'), or a list containing two data.frames giving giving point and line attributes (as returned by spaa.points and spaa.lines, in that order).}
 
   \item{plot.control}{allows detailed control of breaks, sizes and colours for points and lines. See details below.}
 
-  \item{draw.frequencies}{Should species occupancy rates be
-  drawn as point sizes/colours? Defaults to TRUE. Note that this is ignored if new point attributes are supplied using plot.control}
+  \item{graph.function}{if supplied, should be the name of a function (preferably from igraph) that can be used to determine the arrangement of points. Passed to spaa.points; defaults to layout.fruchterman.reingold(). Note that supplying point and line values as a list will cause this function to be ignored.}
 
+  \item{...}{further commands to pass to the function given by graph.function (i.e. to determine point arrangement).}
 }
 \value{
-Draws a network diagram of species pairwise species
-associations, based on strong +ve or -ve associations IDed
-through SPAA.
+Draws a network diagram of species pairwise species associations, based on strong +ve or -ve associations identified using SPAA. This function also invisibly returns an object that can be passed to any of the functions that draw keys in sppairs (i.e. draw.spp.key, draw.line.key or draw.point.key).
 }
 \description{
-Basic plot. Actually a wrapper function to allow plotting of a range of information from spaa()
+Draws a network diagram of the results from species pairwise association analysis.
 }
 \note{
 The plot options available have changed substantially from earlier versions of this package, and are now all manipulable using plot.control. If supplied, plot.control should be a named list containing any or all of the following components. 
@@ -32,7 +30,8 @@ The plot options available have changed substantially from earlier versions of t
     \item{line.breaks}{vector of breaks in species-level occupancy rates used to decide line colours Defaults to seq(0, 1, 0.2) if draw.frequencies=TRUE, else c(0, 1)}
     \item{line.cols}{vector containing colours, either named or in hexadecimal. Used with line.breaks above; length should equal length(line.breaks)-1}
     \item{line.widths}{if given, should provide line widths for each level defined by line.breaks, as for line.cols (above). Passed to lwd in lines().}
+    \item{line.curvature}{length-1 vector, giving the proportion of the radius by which connecting lines should be diverted around intervening points. Defaults to 1.5; setting to zero will enforce straight lines between all vertices. This function is still in beta and may not lead to clean results in crowded plots.}
     \item{text.size}{length-1 numeric vector passed to cex commands in all text options, allowing global scaling of label sizes.}
-    \item{key.placement}{If given, should be a matrix with four columns giving the left, right, bottom and top proportions of the plot window to be used for each section of the plot. Further, the rows (n<=4) should be named with the kind of plot in each window; namely one of 'network' (plotted alone by default) and keys to 'species', 'points' and/or 'lines'. This matrix is passed directly to split.screen; help for that command may assist with understanding use of this matrix.}
+
 }
 }
