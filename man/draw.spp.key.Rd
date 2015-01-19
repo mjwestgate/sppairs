@@ -12,5 +12,5 @@ draw.spp.key(input, labels)
 Draws a (basic) key to the species in a larger plot.
 }
 \seealso{
-draw.line.key draw.point.key
+	\code{\link{draw.point.key}}, \code{\link{draw.line.key}}
 }

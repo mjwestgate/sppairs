@@ -20,4 +20,6 @@ A list containing the components: [[1]] the frequency at which species occur at 
 Calculates a number of odds ratios for all (sufficiently common) species. Basically a wrapper function for
 or.contingency() and or.regression().
 }
-
+\seealso{
+\code{\link{plot.spaa}}
+}

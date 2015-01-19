@@ -11,5 +11,5 @@ draw.point.key(input)
 Draws a (basic) key to point colours and widths
 }
 \seealso{
-draw.line.key draw.spp.key
+	\code{\link{draw.line.key}}, \code{\link{draw.spp.key}}
 }

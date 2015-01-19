@@ -35,3 +35,6 @@ The plot options available have changed substantially from earlier versions of t
 
 }
 }
+\seealso{
+\code{\link{spaa}}
+}

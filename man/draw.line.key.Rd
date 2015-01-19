@@ -12,6 +12,6 @@ draw.line.key(input, labels)
 Draws a (basic) key to line colours and widths
 }
 \seealso{
-draw.point.key draw.spp.key
+	\code{\link{draw.point.key}}, \code{\link{draw.spp.key}}
 }
 
