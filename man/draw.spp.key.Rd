@@ -1,4 +1,5 @@
 \name{draw.spp.key}
+\alias{draw.spp.key}
 \title{Draw a key to species}
 \usage{
 draw.spp.key(input, labels)

@@ -1,4 +1,5 @@
 \name{draw.line.key}
+\alias{draw.line.key}
 \title{Draw a key to line colours/widths}
 \usage{
 draw.line.key(input, labels)

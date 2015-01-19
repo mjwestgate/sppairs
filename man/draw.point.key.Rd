@@ -1,4 +1,5 @@
 \name{draw.point.key}
+\alias{draw.point.key}
 \title{Draw a key to point colours/widths}
 \usage{
 draw.point.key(input)
