@@ -116,10 +116,6 @@ draw.line.key<-function(input, labels){
 	# work out how to display odds ratios
 	values<-dataset$line.breaks
 
-	# ID unplotted values (between 1/threshold - threshold
-	# threshold.loc<-which(values==dataset$threshold)
-	inv.threshold.loc<-which(values==(1/dataset$threshold))
-
 	# format for printing	
 	values2<-c(1/values[values<1], values[values>=1])
 	low.vals<-which(values2<100)
@@ -132,19 +128,31 @@ draw.line.key<-function(input, labels){
 	simple.values[neg.vals]<-paste("1/", simple.values[neg.vals], sep="")
 	if(simple.values[1]=="Inf/1")simple.values[1]<-0
 
+	# if there is a line type for unplotted values, remove this from the key
+	remove.test<-any(values==(1/dataset$threshold)) & any(values==dataset$threshold)
+	if(remove.test){
+		inv.threshold.loc<-which(values==(1/dataset$threshold))
+		dataset$line.cols<-dataset$line.cols[-inv.threshold.loc]
+		dataset$line.widths<-dataset$line.widths[-inv.threshold.loc]
+		keep.rows<-c(1: nrow)[-inv.threshold.loc]
+		nrow<-nrow-1
+	}else{keep.rows<-c(1: nrow)}
+
+	# allow default labels to be overwritten
 	if(missing(labels)){
-		line.labels<-paste(simple.values[1:nrow], simple.values[2:(nrow+1)], sep=" - ")[-inv.threshold.loc]
+		line.labels<-paste(simple.values[1:nrow], simple.values[2:(nrow+1)], sep=" - ")[keep.rows]
 	}else{line.labels<-labels}
-	plot.cols<-dataset$line.cols[-inv.threshold.loc]
-	plot.widths<-dataset$line.widths[-inv.threshold.loc]
+
+	# set misc. defaults
+	y.margin<-min(c((0.1*nrow), 1))
 
 	# add plot
 	par(mar=c(0, 3, 1, 0), cex=0.7)
-	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c(0, (nrow-0.7)))
+	plot(1~1, ann=F, axes=F, type="n", xlim=c(0, 1), ylim=c((1-y.margin), (nrow+ y.margin)))
 	for(i in 1: nrow){
 		lines(x=c(0.1, 1), y=rep(c(1: nrow)[i], 2), 
-			col=plot.cols[i], lwd=plot.widths[i], lend="butt")}
-	axis(2, at=c(1:(nrow-1)), labels=line.labels, lwd=0, line=-1, 
+			col=dataset$line.cols[i], lwd=dataset$line.widths[i], lend="butt")}
+	axis(2, at=c(1:nrow), labels=line.labels, lwd=0, line=-1, 
 		cex.axis=input$plot.control$text.size, las=1)
 	mtext("Odds ratio", side=3, font=2, line=0, cex=input$plot.control$text.size*0.7, adj=0.5)
 	}
