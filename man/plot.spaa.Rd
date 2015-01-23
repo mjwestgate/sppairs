@@ -31,6 +31,8 @@ The plot options available have changed substantially from earlier versions of t
     \item{line.cols}{vector containing colours, either named or in hexadecimal. Used with line.breaks above; length should equal length(line.breaks)-1}
     \item{line.widths}{if given, should provide line widths for each level defined by line.breaks, as for line.cols (above). Passed to lwd in lines().}
     \item{line.curvature}{length-1 vector, giving the proportion of the radius by which connecting lines should be diverted around intervening points. Defaults to 1.5; setting to zero will enforce straight lines between all vertices. This function is still in beta and may not lead to clean results in crowded plots.}
+    \item{arrow.size}{length-1 numeric vector, used to set the arrowhead size, in the same units as point.size; defaults to 1.5}
+    \item{arrow.angle}{length-1 numeric vector giving the angle that each edge of the arrowhead differs from the line direction, in degrees. Defaults to 20.}
     \item{text.size}{length-1 numeric vector passed to cex commands in all text options, allowing global scaling of label sizes.}
 
 }
