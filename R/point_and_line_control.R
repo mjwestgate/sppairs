@@ -4,11 +4,13 @@
 spaa.points<-function(dataset, 
 	threshold, 
 	graph.function, 	# what function should be called to generate point locations?
+	return.matrix,		# logical; if TRUE, returns an adjacency matrix; if FALSE (the default) returns a data.frame of point coordinates
 	... # optional information passed to igraph::layout.fruchterman.reingold
 	)
 {
 if(missing(threshold))threshold<-3
 if(missing(graph.function))graph.function<-"layout.fruchterman.reingold"
+if(missing(return.matrix))return.matrix<-FALSE
 
 # run code for a single spaa result
 if(class(dataset)=="spaa"){
@@ -50,13 +52,21 @@ if(length(rows)>0)
 	{result<-result[-rows, -rows]
 	species.results<-species.results[-rows, ]	}
 
-# get plot coordinates using igraph
-net<-graph.adjacency(result, mode="max", weighted=NULL, diag=FALSE)
-layout<-do.call(graph.function, list(net, ...)) #layout.fruchterman.reingold(net) # layout.kamada.kawai(net)
-points<-as.data.frame(cbind(species.results, layout))
-colnames(points)[2:4]<-c("freq", "x", "y")
+if(return.matrix){return(result)
+}else{
+	# get plot coordinates 
+	if(graph.function=="graph.grid"){
+		layout<-graph.grid(result)
+	}else{
+		net<-graph.adjacency(result, mode="max", weighted=NULL, diag=FALSE)
+		layout<-do.call(graph.function, list(net, ...)) #layout.fruchterman.reingold(net) # layout.kamada.kawai(net)
+	}
+	points<-as.data.frame(cbind(species.results, layout))
+	colnames(points)[2:4]<-c("freq", "x", "y")
+	
+	return(points)
+	}
 
-return(points)
 }
 
 
@@ -177,4 +187,74 @@ graph.kmeans.reduced<-function(input)
 			centre.point[1]-x.diff, centre.point[2]-y.diff)	
 		}
 	return(values)	
+	}
+
+
+
+# function to put points on a grid
+graph.grid<-function(
+	input	,	# association matrix
+	x.expansion		# as plot(asp=1), we may need to change the coordinates of the actual points
+	){
+	# set defaults
+	if(missing(x.expansion))x.expansion<-1.2
+
+	# work out the dimensions of the grid
+	input.size<-dim(input)[1]
+
+	# try an approach on incrementally increasing sized parabolas
+	# first determine how many you need
+	size.ID<-data.frame(n.parabolas=c(1:28), n.entries=cumsum(c(3:30))*2)
+	row<-min(which(size.ID$n.entries>=input.size))
+	n<-size.ID$n.parabolas[row]
+
+	# then work out coordinates for that many points
+	heights<-seq(0, 1, length.out=n+1)[c(2: (n+1))]
+	widths<-(heights*0.5) + 0.5
+	result.list<-list()
+	for(i in 1:n){
+		data.thisrun<-data.frame(x=c(-widths[i], 0, widths[i]), y=c(0, heights[i], 0))
+		model<-lm(y~x+ I(x**2), data=data.thisrun)
+		xvals<-seq(-widths[i], widths[i], length.out=(3+i))
+		x.interval<-xvals[2]-xvals[1]
+		xvals<-xvals[c(1:(2+i))] + (x.interval*0.5)
+		yvals<-as.numeric(predict(model, newdata=data.frame(x=xvals)))
+		result<-data.frame(x=xvals, y=yvals)
+		result.list[[i]]<-result
+		}
+	point.dframe<-do.call(rbind, result.list)
+	point.dframe<-rbind(point.dframe, 
+		data.frame(x=point.dframe$x, y=-1*point.dframe$y))
+
+	# rotate all points by a fixed amount
+	rotation<-0.123
+	point.dframe$new.x<-(point.dframe$x * cos(rotation))-(point.dframe$y * sin(rotation))
+	point.dframe$new.y<-(point.dframe$y * cos(rotation))+(point.dframe$x * sin(rotation))
+	point.dframe<-point.dframe[, 3:4]
+	colnames(point.dframe)<-c("x", "y")
+
+	# order points by increasing distance from origin
+	point.dframe$dist<-sqrt(point.dframe$x^2 + point.dframe$y^2)
+	point.dframe<-point.dframe[order(point.dframe$dist, decreasing=FALSE), ]
+
+	# order species by decreasing number of connections
+	spp.dist<-cbind(
+		apply(input, 1, FUN=function(x){sum(x, na.rm=TRUE)}),
+		apply(input, 2, FUN=function(x){sum(x, na.rm=TRUE)}))
+	spp.freq<-data.frame(
+		species=rownames(spp.dist),
+		n=apply(spp.dist, 1, sum),
+		stringsAsFactors=FALSE)
+	rownames(spp.freq)<-NULL
+	spp.freq<-spp.freq[order(spp.freq$n, decreasing=TRUE), ]
+
+	# merge point and species data
+	point.dframe<-point.dframe[c(1:dim(spp.freq)[1]), ]	# ensure same size
+	result<-cbind(point.dframe, spp.freq)
+
+	# reorder such that spp are in initial order
+	result<-result[order(result$species), 1:2]
+	# result<-jitter(result)	# line drawing doesn't work if points are directly above/below one another 
+		# as coef(model))[2]==NA
+	return(result)
 	}

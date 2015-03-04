@@ -63,14 +63,19 @@ line.adjust<-function(
 	vertex.rows<-which(all.data$match==1)
 	model<-lm(y~x, data= all.data[vertex.rows, ])
 	midpoint.x<-mean(all.data$x[vertex.rows])
-	midpoint.y<-as.numeric(coef(model)[1]+(coef(model)[2]*midpoint.x))
+
+	# set remaining behaviour, allowing different rules if points are directly above or below one another
+	#if(is.na(coef(model)[2])){coef.thisrun<-0
+	#}else{
+	coef.thisrun<-coef(model)[2]  #}
+	midpoint.y<-as.numeric(coef(model)[1]+(coef.thisrun*midpoint.x))
 
 	# 2) set the midpoint of that line as the origin
 	all.data$origin.x<-all.data$x-midpoint.x
 	all.data$origin.y<-all.data$y-midpoint.y
 
 	# 3) rotate all points such that this line is horizontal
-	theta<-as.numeric(-atan(coef(model)[2]))
+	theta<-as.numeric(-atan(coef.thisrun))
 	all.data$new.x<-(all.data$origin.x * cos(theta))-(all.data$origin.y * sin(theta))
 	all.data$new.y<-(all.data$origin.y * cos(theta))+(all.data$origin.x * sin(theta))
 	# note: new.x is used instead of x because your 2-line approach otherwise causes errors
@@ -118,7 +123,10 @@ line.adjust<-function(
 	}else{ # if there is no overlap, return a straight line - no transformation required.
 		new.vertices<-which(all.data$match==1) # as number of rows has changed
 		x.final<-seq(min(all.data$x[new.vertices]), max(all.data$x[new.vertices]), length.out=101)
-		y.final<-predict.lm(model, newdata=data.frame(x=x.final), se.fit=FALSE)
+		#if(is.na(coef(model)[2])){
+		#	y.final<-seq(min(all.data$y[new.vertices]), max(all.data$y[new.vertices]), length.out=101)
+		#}else{
+			y.final<-predict.lm(model, newdata=data.frame(x=x.final), se.fit=FALSE)  # }
 		result<-data.frame(x=x.final, y=as.numeric(y.final))
 		}
 

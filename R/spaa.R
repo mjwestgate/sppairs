@@ -10,16 +10,19 @@ if(missing(method)){
 	method <-"contingency"
 	cat("Warning: method 'glmer' not available without specifying 'random.effect'. Switched to method 'contingency'")}
 }
-if(any(c("contingency", "glm", "glmer")==method)==F){	# if method not recognised, set to 
+# if method not recognised, set to or.contingency
+if(any(c("contingency", "glm", "glmer", "pearsons", "spearmans", "or.symmetric")==method)==F){	
 	cat(paste("Warning: method '", method, "' not recognised. Switching to method 'contingency'", sep=""))
 	method<-"contingency"
 	}
 if(missing(rarity.cutoff))rarity.cutoff<-0.1
 if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
-  
+if(any(c("or.symmetric", "pearsons", "spearmans")==method)){asymmetric<-FALSE}else{asymmetric<-TRUE}
+
 # apply a cutoff to exclude spp. present at all (or none) of the sites
 dataset<-dataset[, which(c(apply(dataset, 2, sum)==dim(dataset)[1])==FALSE)]	# remove 100% occupied
-dataset<-dataset[, which(c(apply(dataset, 2, function(x){length(which(x==0))})==dim(dataset)[1])==FALSE)]	# 0%
+dataset<-dataset[, which(c(apply(dataset, 2, function(x){
+	length(which(x==0))})==dim(dataset)[1])==FALSE)]	# 0%
 # apply rarity cutoff 
 occu.result<-prop.occupied(dataset)
 dataset<-dataset[, which(occu.result>rarity.cutoff)]
@@ -30,12 +33,12 @@ frequency.result<-data.frame(
 	species=names(frequency.result),
 	frequency=as.numeric(frequency.result),
 	stringsAsFactors=FALSE)
-#frequency.result$species<-as.character(frequency.result$species)
   
 # create combn of remaining species
 n.species<-dim(dataset)[2]
 combinations<-t(combn(c(1:n.species), 2))
-combinations<-rbind(combinations, combinations[, c(2, 1)])
+if(asymmetric){
+	combinations<-rbind(combinations, combinations[, c(2, 1)])}
 combinations.final<-data.frame(
 	col1=combinations[, 1],
 	col2=combinations[, 2],
@@ -55,7 +58,13 @@ for(i in 1: n.rows){
 		"glm"={if(any(c(0, Inf)==or.simple)){combinations.final$odds[i]<-or.simple
 			}else{combinations.final$odds[i]<-or.glm(dataset.thisrun)}},
 		"glmer"={if(any(c(0, Inf)==or.simple)){combinations.final$odds[i]<-or.simple
-			}else{combinations.final$odds[i]<-or.glmer(dataset.thisrun, random.effect)}})
+			}else{combinations.final$odds[i]<-or.glmer(dataset.thisrun, random.effect)}},
+		"or.symmetric"={combinations.final$odds[i]<-or.symmetric(dataset.thisrun)},
+		"pearsons"={combinations.final$odds[i]<-cor(
+			x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="pearson")},
+		"spearmans"={combinations.final$odds[i]<-cor(
+			x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="spearman")}
+		)
 	}
   
 # create and return objects necessary for plotting
@@ -67,7 +76,8 @@ output<-list(
 		species= n.species,
 		combinations= n.rows),
 	species=frequency.result,
-	combinations=combinations.final)
+	combinations=combinations.final,
+	asymmetric=asymmetric)
 
 class(output)<-"spaa"
 

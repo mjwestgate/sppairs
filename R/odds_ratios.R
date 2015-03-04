@@ -1,35 +1,4 @@
-# Convert an abundance dataset to presence/absence.
-make.binary<-function(dataset, threshold)
-{
-dataset<-as.data.frame(dataset)	 # avoid errors if single col. entered
-if(missing(threshold)){	# for converting abundance to presence/absence data, this works well
-	dataset<-apply(dataset, 2, function(x){
-		if(any(x>0)){x[which(x>0)]<-1}
-		return(x)})
-}else{	# otherwise, cut by threshold
-	dataset<-apply(dataset, 2, function(x){
-		x<-as.numeric(cut(x, breaks=c(-Inf, threshold, Inf), include.lowest=TRUE))-1
-		return(x)})
-	}
-dataset<-as.data.frame(dataset)	# as apply converts dataset to matrix
-return(dataset)
-}
-
-
-# Calculate the proportion of rows occupied (where rows represent either visits or sites)
-prop.occupied<-function(dataset, random.effect)
-{
-dataset<-as.data.frame(dataset)	# forces dim() to function for ncol=1
-if(missing(random.effect)){
-	occupied<-(1/dim(dataset)[1])*apply(dataset, 2, sum)
-}else{	# i.e. if 'site' is given as a random effect
-	n.sites<-length(levels(random.effect))
-	n.occupied<-apply(dataset, 2, function(x)
-	{length(which(xtabs(x~random.effect)>0))})
-	occupied<-(1/n.sites)*n.occupied}
-return(occupied)
-}
-
+# Functions for calculating odds ratios
 
 # Simple, internal function to check input datasets for compatability with later functions in library(sppairs)
 or.check<-function(dataset)
@@ -53,6 +22,19 @@ c<-cont.table[1, 1]; d<-cont.table[1, 2]; e<-cont.table[2, 1]; f<-cont.table[2, 
 odds.ratio<-(c/d) / ( (c+e) / (d+f) )
 return(odds.ratio)
 }
+
+
+# Calculate symmetric odds ratio
+or.symmetric<-function(dataset)
+{
+dataset<-or.check(dataset)
+cont.table <-as.matrix(table(dataset))[2:1, 2:1]
+# cont.table<-(100/sum(cont.table))*cont.table
+c<-cont.table[1, 1]; d<-cont.table[1, 2]; e<-cont.table[2, 1]; f<-cont.table[2, 2]
+odds.ratio<-(c/e) / (d/f) # == (c/d)/(e/f)
+return(odds.ratio)
+}
+
 
 
 # Calculate odds ratio from results of glm or glmer. Internal to or.glmer and or.glm
