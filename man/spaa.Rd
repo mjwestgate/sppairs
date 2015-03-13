@@ -2,7 +2,7 @@
 \alias{spaa}
 \title{Pairwise odds ratio calculation}
 \usage{
-spaa(dataset, random.effect, rarity.cutoff, quiet)
+spaa(dataset, method, random.effect, rarity.cutoff)
 }
 \arguments{
   \item{dataset}{data.frame where each column is a species. Rows can be sites or visits; if visits, a grouping factor is a good idea.}
