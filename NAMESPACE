@@ -1,6 +1,6 @@
 export(
 draw.line.key, draw.point.key, draw.spp.key,
-make.binary,
+make.binary, make.or.matrix,
 or.contingency, or.glm, or.glmer, 
 plot.spaa,
 spaa, spaa.lines, spaa.points)

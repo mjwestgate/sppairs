@@ -2,6 +2,7 @@ draw.line.key		draw a key to line widths and colours
 draw.point.key		draw a key to point sizes and colours
 draw.spp.key		draw a key to species labels
 make.binary		Convert an abundance dataset to presence/absence
+make.or.matrix		Convert an spaa object to a matrix
 or.contingency		Calculate asymmetric odds ratio from a contingency table
 or.glm			Calculate asymmetric odds ratio using logistic regression
 or.glmer		Calculate asymmetric odds ratio using mixed models
