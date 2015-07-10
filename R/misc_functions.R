@@ -20,16 +20,10 @@ return(dataset)
 
 
 # Calculate the proportion of rows occupied (where rows represent either visits or sites)
-prop.occupied<-function(dataset, random.effect)
+prop.occupied<-function(dataset)
 {
 dataset<-as.data.frame(dataset)	# forces dim() to function for ncol=1
-if(missing(random.effect)){
-	occupied<-(1/dim(dataset)[1])*apply(dataset, 2, sum)
-}else{	# i.e. if 'site' is given as a random effect
-	n.sites<-length(levels(random.effect))
-	n.occupied<-apply(dataset, 2, function(x)
-	{length(which(xtabs(x~random.effect)>0))})
-	occupied<-(1/n.sites)*n.occupied}
+occupied<-(1/dim(dataset)[1])*apply(dataset, 2, sum)
 return(occupied)
 }
 
@@ -73,7 +67,6 @@ make.or.matrix<-function(
 			rows<-which(c(1:n.species)>i)
 			final.matrix[rows, i]<-dist1[rows, i]}
 		}
-	# which(c(final.matrix ==t(final.matrix))==TRUE) # some values identical; but very few
 
 	return(final.matrix)
 	}

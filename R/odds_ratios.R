@@ -57,8 +57,10 @@ or.glmer<-function(dataset, random.effect)
 dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
 b<-(1/dim(dataset)[1])*sum(dataset[, 2])		# proportion of rows at which sp. B occurred
 library(lme4)
-model0<-glmer(dataset[, 1]~1 + (1|random.effect), family=binomial(link="logit"))
-model1<-glmer(dataset[, 1]~dataset[, 2] + (1|random.effect), family=binomial(link="logit"))
+model0<-glmer(dataset[, 1]~1 + (1|random.effect), family=binomial(link="logit"),
+	control=glmerControl(optimizer="bobyqa"))
+model1<-glmer(dataset[, 1]~dataset[, 2] + (1|random.effect), family=binomial(link="logit"),
+	control=glmerControl(optimizer="bobyqa"))
 z0<-as.numeric(fixef(model0))
 z1<-sum(as.numeric(fixef(model1)))
 odds.ratio<-or.regression(b, z0, z1)
