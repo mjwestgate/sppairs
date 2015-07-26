@@ -45,10 +45,9 @@ combinations.final<-data.frame(
 	col2=combinations[, 2],
 	sp1=colnames(dataset)[combinations[, 1]],
 	sp2=colnames(dataset)[combinations[, 2]],
-	odds=rep(NA, dim(combinations)[1]),
 	stringsAsFactors=FALSE)
+combinations.final$odds<-NA
 combinations.final$odds<-as.numeric(combinations.final$odds)
-n.rows<-dim(combinations.final)[1]
 
 # run analysis using apply
 result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
@@ -60,7 +59,8 @@ result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
 		"glm"={
 			if(any(c(0, Inf)==or.simple)){or.simple
 			}else{or.glm(dataset.thisrun)}},
-		"glmer"={if(any(c(0, Inf)==or.simple)){or.simple
+		"glmer"={
+			if(any(c(0, Inf)==or.simple)){or.simple
 			}else{or.glmer(dataset.thisrun, random.effect)}},
 		"or.symmetric"={or.symmetric(dataset.thisrun)},
 		"pearsons"={cor(x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="pearson")},
@@ -69,24 +69,6 @@ result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
 	}, source=dataset, method=method)
 combinations.final$odds<-as.numeric(result)
 
-# run analysis in loop
-# for(i in 1: n.rows){
-	# dataset.thisrun<-dataset[, c(combinations.final$col1[i], combinations.final$col2[i])]
-	# or.simple<-or.contingency(dataset.thisrun)	# run as a test: req. as glmer will fail if no overlap in presences.
-	# switch(method,
-		# "contingency"={combinations.final$odds[i]<-or.simple},
-		# "glm"={if(any(c(0, Inf)==or.simple)){combinations.final$odds[i]<-or.simple
-			# }else{combinations.final$odds[i]<-or.glm(dataset.thisrun)}},
-		# "glmer"={if(any(c(0, Inf)==or.simple)){combinations.final$odds[i]<-or.simple
-			# }else{combinations.final$odds[i]<-or.glmer(dataset.thisrun, random.effect)}},
-		# "or.symmetric"={combinations.final$odds[i]<-or.symmetric(dataset.thisrun)},
-		# "pearsons"={combinations.final$odds[i]<-cor(
-			# x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="pearson")},
-		# "spearmans"={combinations.final$odds[i]<-cor(
-			# x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="spearman")}
-		# )
-	# }
-  
 # create and return objects necessary for plotting
 output<-list(
 	values=list(
@@ -94,7 +76,7 @@ output<-list(
 		observations=dim(dataset)[1],
 		rarity.cutoff= rarity.cutoff,
 		species= n.species,
-		combinations= n.rows),
+		combinations= nrow(combinations.final)),
 	species=frequency.result,
 	combinations=combinations.final,
 	asymmetric=asymmetric)
