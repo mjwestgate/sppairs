@@ -6,5 +6,5 @@ Author: Martin J. Westgate <martinjwestgate@gmail.com>, Peter W. Lane
 Maintainer: Martin J. Westgate <martinjwestgate@gmail.com>
 Description: Calculation and visualisation of Species Pairwise Association
     Analysis (SPAA).
-Depends: R (>= 3.1.0), igraph, lme4, RColorBrewer
+Depends: R (>= 3.1.0), igraph, lme4, RColorBrewer, boot
 License: GPL-2
