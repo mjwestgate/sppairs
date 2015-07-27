@@ -46,8 +46,6 @@ combinations.final<-data.frame(
 	sp1=colnames(dataset)[combinations[, 1]],
 	sp2=colnames(dataset)[combinations[, 2]],
 	stringsAsFactors=FALSE)
-# combinations.final$odds<-NA
-# combinations.final$odds<-as.numeric(combinations.final$odds)
 
 # run analysis using apply
 result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
@@ -69,7 +67,11 @@ result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
 	}, source=dataset, method=method)
 
 if(complex){
-	combinations.final<-cbind(combinations.final, t(result))
+	result<-as.matrix(as.data.frame(result))
+	result<-t(result)
+	rownames(result)<-NULL
+	result<-as.data.frame(result)
+	combinations.final<-cbind(combinations.final, result)
 }else{combinations.final$odds<-as.numeric(result)}
 
 # create and return objects necessary for plotting

@@ -52,11 +52,16 @@ or.glmer<-function(dataset, random.effect, complex=FALSE)
 b<-(1/nrow(dataset))* sum(dataset[, 2])		# proportion of rows at which sp. B occurred
 model<-glmer(dataset[, 1]~dataset[, 2] + (1|random.effect), family=binomial(link="logit"),
 	control=glmerControl(optimizer="bobyqa")) # Note: optimizer doesn't make much difference in most cases
+# work out if there is a convergence error
+if(length(model@optinfo$conv$lme4$messages)>0){converge.warning<-TRUE
+	}else{converge.warning<-FALSE}
 z0<-as.numeric(fixef(model))[1] # coef of a model with fixed effects, but ignoring their effects
 z1<-sum(as.numeric(fixef(model)))
 odds.ratio<-or.regression(b, z0, z1)
 if(complex){
-	return(c(b=b, intercept=z0, slope=as.numeric(fixef(model))[2], odds=odds.ratio))
+	return(c(b=b, 
+		intercept=z0, slope=as.numeric(fixef(model))[2], 
+		converge.warning= converge.warning, odds=odds.ratio))
 }else{return(odds.ratio)}
 }
 
