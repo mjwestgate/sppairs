@@ -47,7 +47,7 @@ return(odds.ratio)
 
 
 # Odds ratio calculation using lme4
-or.glmer<-function(dataset, random.effect)
+or.glmer<-function(dataset, random.effect, complex=FALSE)
 {
 b<-(1/nrow(dataset))* sum(dataset[, 2])		# proportion of rows at which sp. B occurred
 model<-glmer(dataset[, 1]~dataset[, 2] + (1|random.effect), family=binomial(link="logit"),
@@ -55,7 +55,9 @@ model<-glmer(dataset[, 1]~dataset[, 2] + (1|random.effect), family=binomial(link
 z0<-as.numeric(fixef(model))[1] # coef of a model with fixed effects, but ignoring their effects
 z1<-sum(as.numeric(fixef(model)))
 odds.ratio<-or.regression(b, z0, z1)
-return(odds.ratio)
+if(complex){
+	return(c(b=b, intercept=z0, slope=as.numeric(fixef(model))[2], odds=odds.ratio))
+}else{return(odds.ratio)}
 }
 
 
@@ -68,5 +70,7 @@ model<-glm(dataset[, 1]~dataset[, 2], family=binomial(link="logit"))
 z0<-as.numeric(coef(model)[1])	# intercept; occurrence of sp. A in the absence of sp. B
 z1<-sum(as.numeric(coef(model)))	# intercept + slope; occurrence of sp. A in the presence of sp. B
 odds.ratio<-or.regression(b, z0, z1)
-return(odds.ratio)
+if(complex){
+	return(c(b=b, intercept=z0, slope=as.numeric(coef(model)[2]), odds=odds.ratio))
+}else{return(odds.ratio)}
 }

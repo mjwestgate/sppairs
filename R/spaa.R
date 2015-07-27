@@ -1,5 +1,5 @@
 # Pairwise odds ratio calculation
-spaa<-function(dataset, method, rarity.cutoff, random.effect)
+spaa<-function(dataset, method, rarity.cutoff, random.effect, complex=FALSE)
 {
 
 # set some default behaviour
@@ -46,8 +46,8 @@ combinations.final<-data.frame(
 	sp1=colnames(dataset)[combinations[, 1]],
 	sp2=colnames(dataset)[combinations[, 2]],
 	stringsAsFactors=FALSE)
-combinations.final$odds<-NA
-combinations.final$odds<-as.numeric(combinations.final$odds)
+# combinations.final$odds<-NA
+# combinations.final$odds<-as.numeric(combinations.final$odds)
 
 # run analysis using apply
 result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
@@ -58,16 +58,19 @@ result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
 		"contingency"={or.simple},
 		"glm"={
 			if(any(c(0, Inf)==or.simple)){or.simple
-			}else{or.glm(dataset.thisrun)}},
+			}else{or.glm(dataset.thisrun, complex)}},
 		"glmer"={
 			if(any(c(0, Inf)==or.simple)){or.simple
-			}else{or.glmer(dataset.thisrun, random.effect)}},
+			}else{or.glmer(dataset.thisrun, random.effect, complex)}},
 		"or.symmetric"={or.symmetric(dataset.thisrun)},
 		"pearsons"={cor(x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="pearson")},
 		"spearmans"={cor(x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="spearman")})
 	return(result)
 	}, source=dataset, method=method)
-combinations.final$odds<-as.numeric(result)
+
+if(complex){
+	combinations.final<-cbind(combinations.final, t(result))
+}else{combinations.final$odds<-as.numeric(result)}
 
 # create and return objects necessary for plotting
 output<-list(
