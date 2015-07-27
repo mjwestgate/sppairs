@@ -51,15 +51,15 @@ combinations.final<-data.frame(
 result<-apply(combinations.final[, 1:2], 1, FUN=function(x, source, method){
 	x<-as.numeric(x)
 	dataset.thisrun<-source[, x]
-	or.simple<-or.contingency(dataset.thisrun)	
+	#or.simple<-	
 	result<-switch(method, 
-		"contingency"={or.simple},
-		"glm"={
-			if(any(c(0, Inf)==or.simple)){or.simple
-			}else{or.glm(dataset.thisrun, complex)}},
-		"glmer"={
-			if(any(c(0, Inf)==or.simple)){or.simple
-			}else{or.glmer(dataset.thisrun, random.effect, complex)}},
+		"contingency"={or.contingency(dataset.thisrun)},
+		"glm"={or.glm(dataset.thisrun, complex)},
+			# if(any(c(0, Inf)==or.simple)){or.simple
+			# }else{or.glm(dataset.thisrun, complex)}},
+		"glmer"={or.glmer(dataset.thisrun, random.effect, complex)},
+			# if(any(c(0, Inf)==or.simple)){or.simple
+			# }else{or.glmer(dataset.thisrun, random.effect, complex)}},
 		"or.symmetric"={or.symmetric(dataset.thisrun)},
 		"pearsons"={cor(x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="pearson")},
 		"spearmans"={cor(x=dataset.thisrun[, 1], y= dataset.thisrun[, 2], method="spearman")})

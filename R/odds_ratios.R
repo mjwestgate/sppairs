@@ -63,7 +63,7 @@ odds.ratio<-or.regression(b, z0, z1)
 if(complex){
 	return(c(b=b, 
 		intercept=z0, slope=as.numeric(fixef(model))[2], 
-		converge.warning= converge.warning, odds=odds.ratio))
+		converge.warning= converge.warning, or.contingency=or.contingency(dataset), odds=odds.ratio))
 }else{return(odds.ratio)}
 }
 
