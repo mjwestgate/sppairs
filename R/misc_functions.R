@@ -1,4 +1,16 @@
-# Miscellaneous useful functions - should probably make these available to users
+# Miscellaneous useful functions
+
+
+# Simple, internal function to check input datasets for compatability with later functions in library(sppairs)
+or.check<-function(dataset)
+{
+if(dim(dataset)[2]!=2){stop("input does not have two columns")}		# check size
+test<-as.character(apply(dataset, 2, class))		# check contains numbers
+for(i in 1:2){if(any(c("numeric", "integer")==test[i])==F)
+	{stop(paste("column", i, "is not numeric", sep=" "))}}
+	if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
+invisible(dataset)		# return the (possibly corrected) dataset for use in later functions.
+}
 
 
 # Convert an abundance dataset to presence/absence.
@@ -34,39 +46,24 @@ make.or.matrix<-function(
 	){
 	if(class(spaa.object)!="spaa"){stop("input not of class spaa")}
 
-	# get the data we are interested in; split into two separate dataset (upper and lower triangles)
-	dataset<-spaa.object$combinations
-	halfway<-dim(dataset)[1]*0.5
-	dset1<-dataset[c(1:halfway), ]
-	dset2<-dataset[c((halfway+1):dim(dataset)[1]), ]
+	spp.names<-spaa.object$species$species
+	n.spp<-length(spp.names)
 
-	# create a fake distance matrix with the appropriate information
-	species<-sort(unique(dataset$sp1))
-	n.species<-length(species)
-	test.dist<-as.dist(matrix(data=0, nrow=n.species, ncol=n.species), upper=FALSE)
-	attr(test.dist, "Labels")<-species
-
-	# overwrite this with correct data
-	dist1<-test.dist; dist2<-test.dist
-	dist1[1:dim(combn(n.species, 2))[2]]<-dset1$odds
-	dist2[1:dim(combn(n.species, 2))[2]]<-dset2$odds
-
-	# convert back to matrix
-	dist1<-as.matrix(dist1); dist2<-as.matrix(dist2)
-	# any(c(dist1==t(dist1))==FALSE)	# check symmetry
-
-	# merge, such that dist1 provides lower; dist2 provides upper; separated by NAs
-	final.matrix<-matrix(data=NA, nrow=n.species, ncol=n.species)
-	colnames(final.matrix)<-species
-	rownames(final.matrix)<-species
-	for(i in 1:n.species){	
-		if(i>1){
-			rows<-which(c(1:n.species)<i)
-			final.matrix[rows, i]<-dist2[rows, i]}
-		if(i<n.species){
-			rows<-which(c(1:n.species)>i)
-			final.matrix[rows, i]<-dist1[rows, i]}
+	# work out what to do for an asymmetric matrix
+	result<-matrix(data=NA, nrow= n.spp, ncol= n.spp)
+	colnames(result)<-spp.names
+	rownames(result)<-spp.names
+	for(i in 1:nrow(spaa.object$combinations)){
+		sp1<-spaa.object$combinations$sp1[i]
+		sp2<-spaa.object$combinations$sp2[i]
+		row.i<-which(spp.names==sp1)
+		col.i<-which(spp.names==sp2)
+		if(spaa.object$asymmetric){
+			result[row.i, col.i]<-spaa.object$combinations$odds[i]
+		}else{
+			result[row.i, col.i]<-spaa.object$combinations$odds[i]
+			result[col.i, row.i]<-spaa.object$combinations$odds[i]}
 		}
 
-	return(final.matrix)
+	return(result)
 	}

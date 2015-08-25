@@ -1,16 +1,4 @@
-# Functions for calculating odds ratios
-
-# Simple, internal function to check input datasets for compatability with later functions in library(sppairs)
-or.check<-function(dataset)
-{
-if(dim(dataset)[2]!=2){stop("input does not have two columns")}		# check size
-test<-as.character(apply(dataset, 2, class))		# check contains numbers
-for(i in 1:2){if(any(c("numeric", "integer")==test[i])==F)
-	{stop(paste("column", i, "is not numeric", sep=" "))}}
-	if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
-invisible(dataset)		# return the (possibly corrected) dataset for use in later functions.
-}
-
+# Functions for calculating the association between a pair of vectors (mainly from odds ratios)
 
 # Calculate asymmetric odds ratio from a contingency table
 or.contingency<-function(dataset)	
