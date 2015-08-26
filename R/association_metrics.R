@@ -5,11 +5,15 @@ or.contingency<-function(dataset)
 {
 dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
 for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
-count.table <-as.matrix(table(dataset))[2:1, 2:1]
+count.table <-as.matrix(table(dataset))
 pc.table<-(100/sum(count.table))*count.table
-c<-pc.table[1, 1]; d<-pc.table[1, 2]; e<-pc.table[2, 1]; f<-pc.table[2, 2]
-# odds.ratio<-(c/d) / ( (c+e) / (d+f) )
-odds.ratio<-(c / e) / ( (c + d) / (e + f) )
+# values for calculation
+both.pres<-pc.table[2, 2]
+ApresBabs<-pc.table[2, 1]
+Bpres<-sum(pc.table[, 2])
+Babs<-sum(pc.table[, 1])
+# calculate and return
+odds.ratio<-(both.pres/ApresBabs) / (Bpres / Babs)
 return(odds.ratio)
 }
 
@@ -18,10 +22,15 @@ return(odds.ratio)
 or.symmetric<-function(dataset)
 {
 dataset<-or.check(dataset)
-cont.table <-as.matrix(table(dataset))[2:1, 2:1]
+cont.table <-as.matrix(table(dataset))
 pc.table<-(100/sum(cont.table))*cont.table
-c<-pc.table[1, 1]; d<-pc.table[1, 2]; e<-pc.table[2, 1]; f<-pc.table[2, 2]
-odds.ratio<-(c/e) / (d/f) # == (c/d)/(e/f)
+# inputs
+both.pres<-pc.table[2, 2]
+both.abs<-pc.table[1, 1]
+ApresBabs<-pc.table[2, 1]
+AabsBpres<-pc.table[1, 2]
+# calculate and return
+odds.ratio<-(both.pres / AabsBpres) / (ApresBabs / both.abs)
 return(odds.ratio)
 }
 
@@ -39,8 +48,8 @@ return(odds.ratio)
 # Odds ratio calculation using lme4
 or.glmer<-function(dataset, random.effect, complex=FALSE)
 {
-b<-(1/nrow(dataset))* sum(dataset[, 2])		# proportion of rows at which sp. B occurred
-model<-glmer(dataset[, 1]~dataset[, 2] + (1|random.effect), family=binomial(link="logit"),
+b<-(1/nrow(dataset))* sum(dataset[, 1])		# proportion of rows at which sp. B occurred
+model<-glmer(dataset[, 2]~dataset[, 1] + (1|random.effect), family=binomial(link="logit"),
 	control=glmerControl(optimizer="bobyqa")) # Note: optimizer doesn't make much difference in most cases
 # work out if there is a convergence error
 if(length(model@optinfo$conv$lme4$messages)>0){converge.warning<-TRUE
@@ -60,8 +69,8 @@ if(complex){
 or.glm<-function(dataset)
 {
 dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
-b<-(1/dim(dataset)[1])*sum(dataset[, 2])		# proportion of rows at which sp. B occurred
-model<-glm(dataset[, 1]~dataset[, 2], family=binomial(link="logit"))
+b<-(1/dim(dataset)[1])*sum(dataset[, 1])		# proportion of rows at which sp. B occurred
+model<-glm(dataset[, 2]~dataset[, 1], family=binomial(link="logit"))
 z0<-as.numeric(coef(model)[1])	# intercept; occurrence of sp. A in the absence of sp. B
 z1<-sum(as.numeric(coef(model)))	# intercept + slope; occurrence of sp. A in the presence of sp. B
 odds.ratio<-or.regression(b, z0, z1)
