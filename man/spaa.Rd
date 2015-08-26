@@ -7,7 +7,7 @@ spaa(dataset, method, random.effect, rarity.cutoff)
 \arguments{
   \item{dataset}{data.frame where each column is a species. Rows can be sites or visits; if visits, a grouping factor is a good idea.}
 
-  \item{method}{value describing the method to be used. Should be one of "or.contingency", "glm", "glmer", "or.symmetric", "pearsons" or "spearmans".}
+  \item{method}{value describing the method to be used. Should be one of "or.contingency", "glm", "glmer", "or.symmetric", "pearsons", "spearmans" or "mutual.info".}
 
   \item{random.effect}{Grouping variable for visits, if given. Passed to or.regression()}
 
@@ -15,11 +15,10 @@ spaa(dataset, method, random.effect, rarity.cutoff)
 
 }
 \value{
-A list containing the components: [[1]] the frequency at which species occur at sites; [[2]] pairwise odds ratios in long format; [[3]] pairwise odds ratios in wide format
+A data.frame containing the requested association metric
 }
 \description{
-Calculates a number of odds ratios for all (sufficiently common) species. Basically a wrapper function for
-or.contingency() and or.regression().
+Calculates association metrics between all pairs of (sufficiently common) species.
 }
 \seealso{
 \code{\link{plot.spaa}}

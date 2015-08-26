@@ -1,9 +1,6 @@
 export(
 draw.line.key, draw.point.key, draw.spp.key,
 make.binary, make.or.matrix,
-or.contingency, or.glm, or.glmer, 
+or.contingency, or.glm, or.glmer, mutual.information,
 plot.spaa,
 spaa, spaa.lines, spaa.points)
-S3method(plot, spaa)
-S3method(print, spaa)
-S3method(summary, spaa)

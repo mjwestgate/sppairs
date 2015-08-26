@@ -11,6 +11,15 @@ for(i in 1:2){if(any(c("numeric", "integer")==test[i])==F)
 	if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
 invisible(dataset)		# return the (possibly corrected) dataset for use in later functions.
 }
+# note: this defaults to TRUE when called separately, but FALSE when called by spaa
+
+
+# binary entropy function
+binary.entropy<-function(x){ # input is a vector of proportions
+	entropy<-function(x){if(x==0){return(0)}else{return(-x*(log(x, base=2)))}}
+	sapply(x, FUN=function(x){sum(c(entropy(x), entropy(1-x)))})
+	}
+# returns a vector of the same length as the input, giving the binary entropy (in Shannons)
 
 
 # Convert an abundance dataset to presence/absence.
@@ -42,28 +51,27 @@ return(occupied)
 
 # function to make a square (asymmetric) distance matrix of odds ratios
 make.or.matrix<-function(
-	spaa.object	# result from spaa()
+	input	# result from spaa()
 	){
-	if(class(spaa.object)!="spaa"){stop("input not of class spaa")}
-
-	spp.names<-spaa.object$species$species
+	# work out properties of the input
+	spp.names<-sort(unique(as.character(input[, c(1:2)])))
 	n.spp<-length(spp.names)
-
-	# work out what to do for an asymmetric matrix
+	if(nrow(input)==choose(n.spp, 2)){asymmetric<-FALSE}else{asymmetric<-TRUE}
+	# create a matrix
 	result<-matrix(data=NA, nrow= n.spp, ncol= n.spp)
 	colnames(result)<-spp.names
 	rownames(result)<-spp.names
-	for(i in 1:nrow(spaa.object$combinations)){
-		sp1<-spaa.object$combinations$sp1[i]
-		sp2<-spaa.object$combinations$sp2[i]
+	# fill with a loop
+	for(i in 1:nrow(input)){
+		sp1<-input$sp1[i]
+		sp2<-input$sp2[i]
 		row.i<-which(spp.names==sp1)
 		col.i<-which(spp.names==sp2)
-		if(spaa.object$asymmetric){
-			result[row.i, col.i]<-spaa.object$combinations$odds[i]
+		if(asymmetric){
+			result[row.i, col.i]<-input$value[i]
 		}else{
-			result[row.i, col.i]<-spaa.object$combinations$odds[i]
-			result[col.i, row.i]<-spaa.object$combinations$odds[i]}
-		}
-
+			result[row.i, col.i]<-input$value[i]
+			result[col.i, row.i]<-input$value[i]}
+	}
 	return(result)
 	}
