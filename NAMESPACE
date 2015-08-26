@@ -1,5 +1,5 @@
 export(
-draw.line.key, draw.point.key, draw.spp.key,
+binary.entropy, draw.line.key, draw.point.key, draw.spp.key,
 make.binary, make.or.matrix,
 or.contingency, or.glm, or.glmer, mutual.information,
 plot.spaa,

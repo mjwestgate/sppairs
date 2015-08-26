@@ -54,7 +54,7 @@ make.or.matrix<-function(
 	input	# result from spaa()
 	){
 	# work out properties of the input
-	spp.names<-sort(unique(as.character(input[, c(1:2)])))
+	spp.names<-unique(c(input[, 1], input[, 2]))
 	n.spp<-length(spp.names)
 	if(nrow(input)==choose(n.spp, 2)){asymmetric<-FALSE}else{asymmetric<-TRUE}
 	# create a matrix
