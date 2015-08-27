@@ -1,5 +1,5 @@
 # Pairwise odds ratio calculation
-spaa<-function(dataset, method, rarity.cutoff, random.effect, complex=FALSE)
+spaa<-function(dataset, method, random.effect, complex=FALSE, clean=TRUE)
 {
 
 # SET DEFAULTS
@@ -16,17 +16,14 @@ if(any(method.list==method)==F){
 	cat(paste("Warning: method '", method, "' not recognised. Switching to method 'contingency'", sep=""))
 	method<-"contingency"
 	}
-if(missing(rarity.cutoff))rarity.cutoff<-0.1
-if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
-if(any(c("or.symmetric", "pearson", "spearman")==method)){asymmetric<-FALSE}else{asymmetric<-TRUE}
-
-# WORK OUT WHICH SPECIES/COLUMNS TO INCLUDE
-dataset<-dataset[, which(c(apply(dataset, 2, sum)==dim(dataset)[1])==FALSE)]	# remove 100% occupied
-dataset<-dataset[, which(c(apply(dataset, 2, function(x){
-	length(which(x==0))})==dim(dataset)[1])==FALSE)]	# 0%
-# apply rarity cutoff 
-occu.result<-prop.occupied(dataset)
-dataset<-dataset[, which(occu.result>rarity.cutoff)]
+# set symmetry behavior (avoids duplicating symmetric calculations)
+if(any(c("or.symmetric", "pearson", "spearman", "mutual.info")==method)){asymmetric<-FALSE}else{asymmetric<-TRUE}
+# If requested, clean the dataset
+if(length(clean)==1 & is.logical(clean[1])){
+	if(clean(dataset))dataset<-clean.dataset(dataset) # run using defaults
+}else{
+if(is.list(clean)){
+	dataset<-do.call("clean.dataset", append(list(dataset=dataset), clean))}}
 if(ncol(dataset)==0){stop("Error: No species are sufficiently common to analyse")}
 
 # create combn of remaining species

@@ -1,6 +1,6 @@
 # Miscellaneous useful functions
 
-
+## FUNCTIONS TO PROCESS INPUTS ##
 # Simple, internal function to check input datasets for compatability with later functions in library(sppairs)
 or.check<-function(dataset)
 {
@@ -12,14 +12,6 @@ for(i in 1:2){if(any(c("numeric", "integer")==test[i])==F)
 invisible(dataset)		# return the (possibly corrected) dataset for use in later functions.
 }
 # note: this defaults to TRUE when called separately, but FALSE when called by spaa
-
-
-# binary entropy function
-binary.entropy<-function(x){ # input is a vector of proportions
-	entropy<-function(x){if(x==0){return(0)}else{return(-x*(log(x, base=2)))}}
-	sapply(x, FUN=function(x){sum(c(entropy(x), entropy(1-x)))})
-	}
-# returns a vector of the same length as the input, giving the binary entropy (in Shannons)
 
 
 # Convert an abundance dataset to presence/absence.
@@ -40,6 +32,22 @@ return(dataset)
 }
 
 
+# function to ensure dataset is returned correctly
+clean.dataset<-function(dataset, make.binary=TRUE, cutoff.min=0.1, cutoff.max=1){
+	if(make.binary){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
+	# apply rarity cutoff 
+	occu.result<-prop.occupied(dataset)
+	keep.entries<-which(c(occu.result>=cutoff.min & occu.result<=cutoff.max)==TRUE)
+	if(length(keep.entries)>0){
+		dataset<-dataset[, keep.entries]
+		return(dataset)
+	}else{stop("Error: no columns have frequencies within the specified limits")}
+}
+
+
+
+
+## SUMMARY STATISTICS ON INPUTS
 # Calculate the proportion of rows occupied (where rows represent either visits or sites)
 prop.occupied<-function(dataset)
 {
@@ -49,6 +57,15 @@ return(occupied)
 }
 
 
+# binary entropy function
+binary.entropy<-function(x){ # input is a vector of proportions
+	entropy<-function(x){if(x==0){return(0)}else{return(-x*(log(x, base=2)))}}
+	sapply(x, FUN=function(x){sum(c(entropy(x), entropy(1-x)))})
+	}
+# returns a vector of the same length as the input, giving the binary entropy (in Shannons)
+
+
+## FUNCTIONS TO PROCESS OUTPUTS
 # function to make a square (asymmetric) distance matrix of odds ratios
 make.or.matrix<-function(
 	input	# result from spaa()
