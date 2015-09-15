@@ -1,4 +1,35 @@
-# Miscellaneous useful functions
+# Core functions
+
+# SPAA
+# Pairwise association calculation
+spaa<-function(x, method="or.symmetric", asymmetric=FALSE, ...)#. further information passed to method (e.g. random.effect, complex)
+{
+
+if(ncol(x)<2){stop("Error: No species are sufficiently common to analyse")}
+
+# create combn of remaining species
+n.species<-dim(x)[2]
+combinations<-t(combn(c(1:n.species), 2))
+if(asymmetric){	combinations<-rbind(combinations, combinations[, c(2, 1)])}
+combinations.final<-data.frame(
+	col1=combinations[, 1],
+	col2=combinations[, 2],
+	sp1=colnames(dataset)[combinations[, 1]],
+	sp2=colnames(dataset)[combinations[, 2]],
+	stringsAsFactors=FALSE)
+
+# calculate pairwise association using the specified method
+result<-apply(combinations.final[, 1:2], 1, FUN=function(y, source, method, ...){
+	y<-as.numeric(y)
+	dataset.thisrun<-source[, y]
+	value<-do.call(method, list(dataset.thisrun, ...))
+	return(value)
+	}, source=x, method=method)
+combinations.final$value<-as.numeric(result)
+return(combinations.final[, -c(1:2)])
+
+}
+
 
 ## FUNCTIONS TO PROCESS INPUTS ##
 # Simple, internal function to check input datasets for compatability with later functions in library(sppairs)
@@ -11,7 +42,7 @@ for(i in 1:2){if(any(c("numeric", "integer")==test[i])==F)
 	if(any(dataset>1)){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
 invisible(dataset)		# return the (possibly corrected) dataset for use in later functions.
 }
-# note: this defaults to TRUE when called separately, but FALSE when called by spaa
+# note: this defaults to FALSE, but can be called by spaa by setting run.check=TRUE
 
 
 # Convert an abundance dataset to presence/absence.
@@ -32,9 +63,11 @@ return(dataset)
 }
 
 
-# function to ensure dataset is returned correctly
-clean.dataset<-function(dataset, make.binary=TRUE, cutoff.min=0.1, cutoff.max=1){
-	if(make.binary){dataset<-make.binary(dataset)}		# check if any values >1; if so, convert to binary
+# function to ensure dataset is in a useful format for binary analysis
+# This function is not called by any others; but may be useful for preprocessing; e.g. spaa(clean.dataset(x))
+# most useful purpose is to cut very rare or very common species.
+clean.dataset<-function(dataset, make.binary=TRUE, cutoff.min=0.1, cutoff.max=1, ...){ #... allows threshold to be passed to make.binary
+	if(make.binary){dataset<-make.binary(dataset, ...)}		# check if any values >1; if so, convert to binary
 	# apply rarity cutoff 
 	occu.result<-prop.occupied(dataset)
 	keep.entries<-which(c(occu.result>=cutoff.min & occu.result<=cutoff.max)==TRUE)
@@ -58,11 +91,13 @@ return(occupied)
 
 
 # binary entropy function
+# returns a vector of the same length as the input, giving the binary entropy (in Shannons)
+# may be useful in combinations with prop.occupied
 binary.entropy<-function(x){ # input is a vector of proportions
 	entropy<-function(x){if(x==0){return(0)}else{return(-x*(log(x, base=2)))}}
 	sapply(x, FUN=function(x){sum(c(entropy(x), entropy(1-x)))})
 	}
-# returns a vector of the same length as the input, giving the binary entropy (in Shannons)
+
 
 
 ## FUNCTIONS TO PROCESS OUTPUTS

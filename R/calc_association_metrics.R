@@ -1,7 +1,7 @@
 # Functions for calculating the association between a pair of vectors (mainly from odds ratios)
 
 # Calculate asymmetric odds ratio from a contingency table
-or.contingency<-function(dataset, run.check=TRUE)	
+or.asymmetric<-function(dataset, run.check=FALSE)	
 {
 if(run.check)dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
 for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
@@ -19,7 +19,7 @@ return(odds.ratio)
 
 
 # Calculate symmetric odds ratio
-or.symmetric<-function(dataset, run.check=TRUE)
+or.symmetric<-function(dataset, run.check= FALSE)
 {
 if(run.check)dataset<-or.check(dataset)	
 cont.table <-as.matrix(table(dataset))
@@ -46,7 +46,7 @@ return(odds.ratio)
 
 
 # Odds ratio calculation using lme4
-or.glmer<-function(dataset, random.effect, complex=FALSE, run.check=TRUE)
+or.glmer<-function(dataset, random.effect, complex=FALSE, run.check= FALSE)
 {
 if(run.check)dataset<-or.check(dataset)	
 b<-(1/nrow(dataset))* sum(dataset[, 1])		# proportion of rows at which sp. B occurred
@@ -67,7 +67,7 @@ if(complex){
 
 
 # Odds ratio calculation using glm
-or.glm<-function(dataset, complex=FALSE, run.check=TRUE)
+or.glm<-function(dataset, complex=FALSE, run.check= FALSE)
 {
 if(run.check)dataset<-or.check(dataset)	# will either correct the dataset, or stop this function with an error
 b<-(1/dim(dataset)[1])*sum(dataset[, 1])		# proportion of rows at which sp. B occurred
@@ -81,7 +81,7 @@ if(complex){return(c(b=b, intercept=z0, slope=as.numeric(coef(model)[2]), value=
 
 
 # mutual information - based on entropy::mi.plugin
-mutual.information<-function(dataset, run.check=TRUE){
+mutual.information<-function(dataset, run.check= FALSE){
 	if(run.check)dataset<-or.check(dataset)
 	for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
 	count.table <-as.matrix(table(dataset))
