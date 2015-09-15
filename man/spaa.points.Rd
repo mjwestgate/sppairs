@@ -1,6 +1,6 @@
 \name{spaa.points}
 \alias{spaa.points}
-\title{Point locations}
+\title{Calculate point locations}
 \usage{
 spaa.points(dataset, threshold, graph.function, ...)
 }

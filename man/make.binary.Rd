@@ -1,6 +1,6 @@
 \name{make.binary}
 \alias{make.binary}
-\title{Make Binary}
+\title{Convert a matrix or data.frame to binary}
 \usage{
 make.binary(dataset, threshold)
 }

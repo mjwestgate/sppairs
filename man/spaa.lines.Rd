@@ -1,6 +1,6 @@
 \name{spaa.lines}
 \alias{spaa.lines}
-\title{Line attributes}
+\title{Calculate line attributes}
 \usage{
 spaa.lines(dataset, threshold, reduce)
 }

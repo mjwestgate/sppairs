@@ -1,6 +1,6 @@
 \name{prop.occupied}
 \alias{prop.occupied}
-\title{Propotion of occupied sites}
+\title{Proportion of occupied sites}
 \usage{
 prop.occupied(dataset)
 }

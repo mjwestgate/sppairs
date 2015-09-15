@@ -14,8 +14,8 @@ if(asymmetric){	combinations<-rbind(combinations, combinations[, c(2, 1)])}
 combinations.final<-data.frame(
 	col1=combinations[, 1],
 	col2=combinations[, 2],
-	sp1=colnames(dataset)[combinations[, 1]],
-	sp2=colnames(dataset)[combinations[, 2]],
+	sp1=colnames(x)[combinations[, 1]],
+	sp2=colnames(x)[combinations[, 2]],
 	stringsAsFactors=FALSE)
 
 # calculate pairwise association using the specified method
@@ -66,14 +66,14 @@ return(dataset)
 # function to ensure dataset is in a useful format for binary analysis
 # This function is not called by any others; but may be useful for preprocessing; e.g. spaa(clean.dataset(x))
 # most useful purpose is to cut very rare or very common species.
-clean.dataset<-function(dataset, make.binary=TRUE, cutoff.min=0.1, cutoff.max=1, ...){ #... allows threshold to be passed to make.binary
-	if(make.binary){dataset<-make.binary(dataset, ...)}		# check if any values >1; if so, convert to binary
+clean.dataset<-function(x, make.binary=TRUE, cutoff.min=0.1, cutoff.max=1, ...){ #... allows threshold to be passed to make.binary
+	if(make.binary){x<-make.binary(x, ...)}		# check if any values >1; if so, convert to binary
 	# apply rarity cutoff 
-	occu.result<-prop.occupied(dataset)
+	occu.result<-prop.occupied(x)
 	keep.entries<-which(c(occu.result>=cutoff.min & occu.result<=cutoff.max)==TRUE)
 	if(length(keep.entries)>0){
-		dataset<-dataset[, keep.entries]
-		return(dataset)
+		x<-x[, keep.entries]
+		return(x)
 	}else{stop("Error: no columns have frequencies within the specified limits")}
 }
 
