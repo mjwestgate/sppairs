@@ -37,10 +37,14 @@ or.glmer(beetles[, c(1, 10)], random.effect=groups)
 
 # ensure data are binary, with no very common or very rare spp.
 beetles.clean<-clean.dataset(beetles, cutoff.min=0.1, cutoff.max=0.95)
+
 # apply a method of pairwise association to all pairs of spp.
-test2<-spaa(beetles.clean, method="or.glm")
+test<-spaa(beetles.clean, method="or.glm")
 # plot
-plot.spaa(test2, vertex.color="grey", vertex.label.color="black")
+plot.spaa(test, vertex.color="grey", vertex.label.color="black")
+
+# try using a function from outside sppairs
+spaa(beetles.clean, method=function(x){cor(x[, 1], x[, 2], method="spearman")})
 
 # NOTES: 
 	# 1. This can take a long time; particularly for many spp.
