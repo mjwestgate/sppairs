@@ -35,9 +35,14 @@ or.glm(beetles[, c(1, 10)])
 groups<-as.factor(rep(c(1:10), length.out=dim(beetles)[1])) # create grouping variable for example purposes ONLY
 or.glmer(beetles[, c(1, 10)], random.effect=groups)
 
-# Calculate odds ratios for all pairs of species.
-or.test<-spaa(clean.dataset(beetles, min.cutoff=0.1))
-# NOTE: 
+# ensure data are binary, with no very common or very rare spp.
+beetles.clean<-clean.dataset(beetles, cutoff.min=0.1, cutoff.max=0.95)
+# apply a method of pairwise association to all pairs of spp.
+test2<-spaa(beetles.clean, method="or.glm")
+# plot
+plot.spaa(test2, vertex.color="grey", vertex.label.color="black")
+
+# NOTES: 
 	# 1. This can take a long time; particularly for many spp.
 	# 2. glmer in lme4 v1+ often gives error messages. 
 
