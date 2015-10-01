@@ -1,7 +1,7 @@
 # sppairs
 # Species Pairwise Association Analysis (SPAA)
 
-SPAA uses odds ratios to calculate and visualise pairwise associations between species from presence/absence data. It is a simple method that can be applied to site by species matrices in a range of contexts, and provides an alternative to dissimilarity-based approaches. This package gives a simple implementation of the SPAA approach, which you can read a  full description of in this article:
+SPAA was designed to calculate the degree of spatial association/co-occurrence between species from presence/absence data. The current implementation allows users to call any function that might plausibly be used to measure association between each pair of vectors. This allows users to call the original odds ratio -based methods; to call other functions such as cor(); or to build and call their own functions. A description of the original method is available in this article:
 
     Lane, P.W., D.B. Lindenmayer, P.S. Barton, W. Blanchard & M.J. Westgate (2014) 
     "Visualisation of species pairwise associations: a case study of surrogacy in 
@@ -12,12 +12,14 @@ Package details:
 Website: http://martinwestgate.com/code/sppairs/   
 Authors: Martin Westgate (<martinjwestgate@gmail.com>) and Peter Lane   
 
+Note: Automated plotting of pairwise association networks is retained in this version for backwards-compatability, but no longer retains any functionality beyond that shipped with igraph. Users should consider calling igraph directly for cleaner results.
+
 # Example
 
 ```
 # Load required packages
 library(devtools)
-install_github('sppairs', 'mjwestgate')
+install_github('mjwestgate/sppairs')
 library(sppairs)
 
 # get some data
@@ -26,61 +28,26 @@ data(beetles)
 
 # Test odds ratio calculation for a single set of species
 # First, try a simple approach using contingency tables
-or.contingency(beetles[, c(1, 10)])
+or.symmetric(beetles[, c(1, 10)])
 # Alternatively, the odds ratios can be calculated from logistic regression:
 or.glm(beetles[, c(1, 10)])	
 # using mixed models to account for repeat visits (requires lme4)
 groups<-as.factor(rep(c(1:10), length.out=dim(beetles)[1])) # create grouping variable for example purposes ONLY
 or.glmer(beetles[, c(1, 10)], random.effect=groups)
 
-# Calculate odds ratios for all pairs of species.
-or.test<-spaa(beetles, rarity.cutoff=0.1)
-# NOTE: 
+# ensure data are binary, with no very common or very rare spp.
+beetles.clean<-clean.dataset(beetles, cutoff.min=0.1, cutoff.max=0.95)
+
+# apply a method of pairwise association to all pairs of spp.
+test<-spaa(beetles.clean, method="or.glm")
+# plot
+plot.spaa(test, vertex.color="grey", vertex.label.color="black")
+
+# try using a function from outside sppairs
+spaa(beetles.clean, method=function(x){cor(x[, 1], x[, 2], method="spearman")})
+
+# NOTES: 
 	# 1. This can take a long time; particularly for many spp.
 	# 2. glmer in lme4 v1+ often gives error messages. 
 
-
-# Some basic summaries:
-# Histogram of % sites occupied
-hist(or.test$species$frequency, 
-	las=1, xlim=c(0, 1),
-	xlab="proportion", ylab="number of species", main="proportion of sites occupied by each spp.")
-# Histogram of odds ratios
-hist(or.test$combinations$odds,
-	las=1,
-	breaks=c(c(0,  0.333, 0.666), seq(1, 4, 0.5), Inf), 
-    xlim=c(0, 4),
-	xlab="odds ratio", main="Results of pairwise.odds.ratio() for all sites and spp.")
-# how many spp. in each indicator category?
-length(which(or.test$combinations$odds>3))	#  n pairs of significant indicators
-length(which(or.test$combinations$odds<0.33))	# n pairs of contra-indicators
-or.test$combinations[which(or.test$combinations$odds>3), ] # show pairs of species that meet +ve indicator criteria
-
-
-# Draw a simple plot
-plot(or.test)
-
-# Alternatively, calculate point and line values, then plot
-point.coords<-spaa.points(or.test)	# avoids issue whereby igraph gives a different arrangement each time
-line.values<-spaa.lines(or.test)		# sets line properties in a sensible way.
-plot.spaa(list(point.coords, line.values))	# default behaviour (as above)
-
-# Customize plot appearance
-split.screen(matrix(data=c(
-  0, 0.85, 0, 1,
-  0.85, 1, 0, 1,
-  0, 0.2, 0.02, 0.32,	
-  0.18, 0.40, 0.02, 0.22),
-  nrow=4, ncol=4, byrow=TRUE))
-screen(1)
-input<-plot.spaa(list(points=point.coords, lines=line.values), plot.control=list(
-  line.cols=brewer.pal(5, "Blues")[2:5],
-  line.breaks=c(3, 5, 7, 9, Inf),
-  line.widths=rep(2, 4),	# note: length(line.widths) must = length(line.cols)
-  point.breaks=c(0, 0.2, 0.3, 0.4, 0.5, 1))
-  )
-screen(2); draw.spp.key(input)
-screen(3); draw.point.key(input)
-screen(4); draw.line.key(input)
-close.screen(all=TRUE)
 ```

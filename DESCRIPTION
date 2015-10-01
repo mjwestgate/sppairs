@@ -1,10 +1,9 @@
 Package: sppairs
-Version: 0.2
+Version: 1.0
 Date: 2015-01-16
 Title: Species Pairwise Association Analysis (SPAA)
 Author: Martin J. Westgate <martinjwestgate@gmail.com>, Peter W. Lane
 Maintainer: Martin J. Westgate <martinjwestgate@gmail.com>
-Description: Calculation and visualisation of Species Pairwise Association
-    Analysis (SPAA).
+Description: Calculation of pairwise association
 Depends: R (>= 3.1.0), igraph, lme4, RColorBrewer, boot
 License: GPL-2

@@ -1,12 +1,12 @@
-draw.line.key		draw a key to line widths and colours
-draw.point.key		draw a key to point sizes and colours
-draw.spp.key		draw a key to species labels
+binary.entropy		Calculate the binary entropy function on proportion data
+clean.dataset		Convert raw site-by-species matrices to binary and remove rare 
 make.binary		Convert an abundance dataset to presence/absence
-make.or.matrix		Convert an spaa object to a matrix
-or.contingency		Calculate asymmetric odds ratio from a contingency table
+make.wide.format	Convert an spaa object to a matrix
+mutual.information	Calculate pairwise association using mutual information
+or.asymmetric		Calculate asymmetric odds ratio from a contingency table
 or.glm			Calculate asymmetric odds ratio using logistic regression
 or.glmer		Calculate asymmetric odds ratio using mixed models
-plot.spaa		wrapper function to plot results from spaa
-spaa			Calculate odds ratios for all pairs of columns (species)
-spaa.lines		Set line properties for plotting
-spaa.points		Use igraph to calculate sensible point locations
+or.symmetric		Calculate symmetric odds ratio from a contingency table
+plot.spaa		Wrapper function to plot results from spaa
+prop.occupied		Calculate the proportion of occupied rows for each column
+spaa			Calculate association between all pairs of columns

@@ -1,26 +1,36 @@
 \name{spaa}
 \alias{spaa}
-\title{Pairwise odds ratio calculation}
+\title{Species pairwise association analysis}
 \usage{
-spaa(dataset, method, random.effect, rarity.cutoff)
+spaa(x, method, asymmetric, ...)
 }
 \arguments{
-  \item{dataset}{data.frame where each column is a species. Rows can be sites or visits; if visits, a grouping factor is a good idea.}
+  \item{x}{data.frame where each column is a species. Rows can be sites or visits; if visits, using or.glmer with a grouping factor might be a good idea.}
 
-  \item{method}{value describing the method to be used. Should be one of "or.contingency", "glm", "glmer", "or.symmetric", "pearsons" or "spearmans".}
+  \item{method}{Name of the function to be used to calculate the degree of association between two species. Note that the specified function must return a single value.}
 
-  \item{random.effect}{Grouping variable for visits, if given. Passed to or.regression()}
+  \item{asymmetric}{If FALSE (the default), the pairwise association metric is assumed to be symmetric, and the function returns a data.frame with nrow(x)=choose(ncol(x), 2). If TRUE, the output has twice this many rows, with both directions of the association being calculated separately.}
 
-  \item{rarity.cutoff}{Minimum proportion of occupied sites/visits for a species (column) to be included. Defaults to 0.1.}
+  \item{...}{further information passed to 'method'}
 
 }
 \value{
-A list containing the components: [[1]] the frequency at which species occur at sites; [[2]] pairwise odds ratios in long format; [[3]] pairwise odds ratios in wide format
+A 3-column data.frame containing the names of the pair of species in question ($sp1, $sp2) the requested association metric ($value)
 }
 \description{
-Calculates a number of odds ratios for all (sufficiently common) species. Basically a wrapper function for
-or.contingency() and or.regression().
+Calculates association metrics between all pairs of (sufficiently common) species.
+}
+\note{
+Be aware that this function can take a long time to run for large matrices. Methods for calculating pairwise associations in this package include:
+  \describe{
+    \item{or.symmetric}{The default; Calculates the symmetric odds ratio using contingency tables}
+    \item{or.asymmetric}{Calculates the asymmetric odds ratio using contingency tables}
+    \item{or.glm}{Calculates the asymmetric odds ratio using logisitic regression}
+    \item{or.glmer}{Calculates the asymmetric odds ratio using logisitic mixed models (using lme4)}
+    \item{mutual.information}{Calculates mutual information as defined in information theory}
+	}
 }
 \seealso{
 \code{\link{plot.spaa}}
 }
+
