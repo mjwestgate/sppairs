@@ -1,7 +1,6 @@
 export(
 binary.entropy, clean.dataset,
-draw.line.key, draw.point.key, draw.spp.key,
-make.binary, make.or.matrix,
+make.binary, make.wide.format,
 or.symmetric, or.asymmetric, or.glm, or.glmer, mutual.information,
 plot.spaa, prop.occupied,
-spaa, spaa.lines, spaa.points)
+spaa)

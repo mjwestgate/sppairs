@@ -26,7 +26,12 @@ result<-apply(combinations.final[, 1:2], 1, FUN=function(y, source, method, ...)
 	return(value)
 	}, source=x, method=method)
 combinations.final$value<-as.numeric(result)
-return(combinations.final[, -c(1:2)])
+combinations.final<-combinations.final[, -c(1:2)]
+
+# add attributes to show how values were calculated.
+attr(combinations.final, "association.function")<-method
+attr(combinations.final, "asymmetric")<-asymmetric
+return(combinations.final)
 
 }
 
@@ -102,7 +107,7 @@ binary.entropy<-function(x){ # input is a vector of proportions
 
 ## FUNCTIONS TO PROCESS OUTPUTS
 # function to make a square (asymmetric) distance matrix of odds ratios
-make.or.matrix<-function(
+make.wide.format<-function(
 	input	# result from spaa()
 	){
 	# work out properties of the input
