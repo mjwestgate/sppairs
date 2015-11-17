@@ -6,12 +6,12 @@ or.asymmetric<-function(dataset, run.check=FALSE)
 if(run.check)dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
 for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
 count.table <-as.matrix(table(dataset))
-pc.table<-(100/sum(count.table))*count.table
+#pc.table<-(100/sum(count.table))*count.table # original version
 # values for calculation
-both.pres<-pc.table[2, 2]
-ApresBabs<-pc.table[2, 1]
-Bpres<-sum(pc.table[, 2])
-Babs<-sum(pc.table[, 1])
+both.pres<-count.table[2, 2]
+ApresBabs<-count.table[2, 1]
+Bpres<-sum(count.table[, 2])
+Babs<-sum(count.table[, 1])
 # calculate and return
 odds.ratio<-(both.pres/ApresBabs) / (Bpres / Babs)
 return(odds.ratio)
@@ -22,13 +22,13 @@ return(odds.ratio)
 or.symmetric<-function(dataset, run.check= FALSE)
 {
 if(run.check)dataset<-or.check(dataset)	
-cont.table <-as.matrix(table(dataset))
-pc.table<-(100/sum(cont.table))*cont.table
+count.table <-as.matrix(table(dataset))
+#pc.table<-(100/sum(count.table))*count.table # original version
 # inputs
-both.pres<-pc.table[2, 2]
-both.abs<-pc.table[1, 1]
-ApresBabs<-pc.table[2, 1]
-AabsBpres<-pc.table[1, 2]
+both.pres<-count.table[2, 2]
+both.abs<-count.table[1, 1]
+ApresBabs<-count.table[2, 1]
+AabsBpres<-count.table[1, 2]
 # calculate and return
 odds.ratio<-(both.pres / AabsBpres) / (ApresBabs / both.abs)
 return(odds.ratio)
@@ -98,3 +98,20 @@ mutual.information<-function(dataset, run.check= FALSE){
 	return(result)
 	}
 # Note: equvalent code using library(entropy) would be: mi.plugin(pc.table, unit="log2")
+
+
+# Significance of association using Fisher's exact test
+fisher.test.pval<-function(dataset, run.check=FALSE, invert=TRUE)	
+{
+if(run.check)dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
+for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
+count.table <-as.matrix(table(dataset))
+test.results<-c(
+	positive=fisher.test(count.table, alternative="greater")$p.value,
+	negative=fisher.test(count.table, alternative="less")$p.value)
+direction<-which.min(test.results)
+result<-test.results[direction]
+if(invert)result<-1-result
+if(direction==2){result<-result*(-1)}
+return(result)
+}
