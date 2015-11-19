@@ -1,7 +1,9 @@
 binary.entropy		Calculate the binary entropy function on proportion data
 clean.dataset		Convert raw site-by-species matrices to binary and remove rare 
+fisher.test.val		Calculate significance of association using Fisher’s exact test
 make.binary		Convert an abundance dataset to presence/absence
-make.wide.format	Convert an spaa object to a matrix
+make.long.format	Convert a matrix of pairwise associations to a data.frame
+make.wide.format	Convert a data.frame of pairwise associations to a matrix
 mutual.information	Calculate pairwise association using mutual information
 or.asymmetric		Calculate asymmetric odds ratio from a contingency table
 or.glm			Calculate asymmetric odds ratio using logistic regression
