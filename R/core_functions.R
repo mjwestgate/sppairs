@@ -11,7 +11,7 @@ if(ncol(x)<2){stop("Error: No species are sufficiently common to analyse")}
 n.species<-dim(x)[2]
 combinations<-t(combn(c(1:n.species), 2))
 if(asymmetric){	combinations<-rbind(combinations, combinations[, c(2, 1)])}
-combinations.final<-data.frame(
+result<-data.frame(
 	col1=combinations[, 1],
 	col2=combinations[, 2],
 	sp1=colnames(x)[combinations[, 1]],
@@ -19,19 +19,20 @@ combinations.final<-data.frame(
 	stringsAsFactors=FALSE)
 
 # calculate pairwise association using the specified method
-result<-apply(combinations.final[, 1:2], 1, FUN=function(y, source, method, ...){
+association.value<-apply(result[, 1:2], 1, FUN=function(y, source, method, ...){
 	y<-as.numeric(y)
 	dataset.thisrun<-source[, y]
 	value<-do.call(method, list(dataset.thisrun, ...))
 	return(value)
-	}, source=x, method=method)
-combinations.final$value<-as.numeric(result)
-combinations.final<-combinations.final[, -c(1:2)]
+	}, source=x, method=method, ...=...)
+result$value<-as.numeric(association.value)
+result<-result[, -c(1:2)]
+result<-result[order(result$sp1, result$sp2), ]
 
 # add attributes to show how values were calculated.
-attr(combinations.final, "association.function")<-method
-attr(combinations.final, "asymmetric")<-asymmetric
-return(combinations.final)
+attr(result, "association.function")<-method
+attr(result, "asymmetric")<-asymmetric
+return(result)
 
 }
 
@@ -120,15 +121,44 @@ make.wide.format<-function(
 	rownames(result)<-spp.names
 	# fill with a loop
 	for(i in 1:nrow(input)){
-		sp1<-input$sp1[i]
-		sp2<-input$sp2[i]
-		row.i<-which(spp.names==sp1)
-		col.i<-which(spp.names==sp2)
+		sp1<-input[i, 1]
+		sp2<-input[i, 2]
+		row.i<-which(spp.names==sp2)
+		col.i<-which(spp.names==sp1)
 		if(asymmetric){
-			result[row.i, col.i]<-input$value[i]
+			result[row.i, col.i]<-input[i, 3]
 		}else{
-			result[row.i, col.i]<-input$value[i]
-			result[col.i, row.i]<-input$value[i]}
+			result[row.i, col.i]<-input[i, 3]
+			result[col.i, row.i]<-input[i, 3]}
 	}
 	return(result)
 	}
+
+
+# function to convert a square matrix to a 3-column dataframe (i.e. inverse of make.wide.format)
+make.long.format<-function(input){
+	# get basic summaries
+	asymmetric<-any(c(input==t(input))==FALSE, na.rm=TRUE)
+	if(length(colnames(input))==0){spp.names<-paste("V", c(1:ncol(input)), sep="")
+		}else{spp.names<-colnames(input)}
+	n.spp<-ncol(input)
+	# generate an appropriately-sized data.frame for the matrix in question, fill with data	
+	if(asymmetric){
+		line.list<-rbind(t(combn(spp.names, 2)), t(combn(spp.names, 2))[, c(2, 1)],
+			matrix(rep(spp.names, each=2), nrow= n.spp, ncol=2, byrow=TRUE))
+		order.list<-rbind(
+			t(combn(c(1: n.spp), 2)), 
+			t(combn(c(1: n.spp), 2))[, c(2, 1)],
+			matrix(rep(c(1: n.spp), each=2), nrow= n.spp, ncol=2, byrow=TRUE))
+		line.list<-as.data.frame(line.list[order(order.list[, 1], order.list[, 2]), ], stringsAsFactors=FALSE)
+		line.list$value<-as.numeric(input)
+	}else{
+		line.list<-data.frame(t(combn(spp.names, 2)), stringsAsFactors=FALSE)
+		line.list$value<-as.numeric(as.dist(input))}
+	# clean results
+	colnames(line.list)[1:2]<-c("sp1", "sp2") # good colnames
+	line.list<-line.list[which(c(line.list$sp1!=line.list$sp2)), ] # remove diagonals
+	line.list<-line.list[order(line.list$sp1, line.list$sp2), ] # consistent order
+	return(line.list) # export
+	}
+
