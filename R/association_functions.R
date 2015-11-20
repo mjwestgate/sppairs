@@ -101,14 +101,17 @@ mutual.information<-function(dataset, run.check= FALSE){
 
 
 # Significance of association using Fisher's exact test
-fisher.test.pval<-function(dataset, run.check=FALSE, invert=TRUE)	
+fisher.test.pval<-function(dataset, run.check=FALSE, 
+	invert=TRUE,  # return 1-P (TRUE) or P (FALSE)
+	or.multiplier=1, # value passed to or for +ve associations in fisher test; 1/x for -ve associations
+	...) # further info passed to fisher.test, conf.level
 {
 if(run.check)dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
 for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
 count.table <-as.matrix(table(dataset))
 test.results<-c(
-	positive=fisher.test(count.table, alternative="greater")$p.value,
-	negative=fisher.test(count.table, alternative="less")$p.value)
+	positive=fisher.test(count.table, or=or.multiplier, alternative="greater")$p.value,
+	negative=fisher.test(count.table, or=1/or.multiplier, alternative="less")$p.value)
 direction<-which.min(test.results)
 result<-test.results[direction]
 if(invert)result<-1-result
