@@ -61,7 +61,7 @@ odds.ratio<-or.regression(b, z0, z1)
 if(complex){
 	return(c(b=b, 
 		intercept=z0, slope=as.numeric(fixef(model))[2], 
-		converge.warning= converge.warning, or.contingency=or.contingency(dataset), value=odds.ratio))
+		converge.warning= converge.warning, or.asymmetric=or.asymmetric(dataset), value=odds.ratio))
 }else{return(odds.ratio)}
 }
 
@@ -105,16 +105,27 @@ fisher.test.pval<-function(dataset, run.check=FALSE,
 	invert=TRUE,  # return 1-P (TRUE) or P (FALSE)
 	or.multiplier=1, # value passed to or for +ve associations in fisher test; 1/x for -ve associations
 	...) # further info passed to fisher.test, conf.level
-{
-if(run.check)dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
-for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
-count.table <-as.matrix(table(dataset))
-test.results<-c(
-	positive=fisher.test(count.table, or=or.multiplier, alternative="greater")$p.value,
-	negative=fisher.test(count.table, or=1/or.multiplier, alternative="less")$p.value)
-direction<-which.min(test.results)
-result<-test.results[direction]
-if(invert)result<-1-result
-if(direction==2){result<-result*(-1)}
-return(result)
-}
+	{
+	if(run.check)dataset<-or.check(dataset)		# will either correct the dataset, or stop this function with an error
+	for(i in 1:2){dataset[, i]<-factor(dataset[, i], levels=c(0, 1), labels=c("0", "1"))}	 # avoids errors with 100% zeros or ones
+	count.table <-as.matrix(table(dataset))
+	test.results<-c(
+		positive=fisher.test(count.table, or=or.multiplier, alternative="greater")$p.value,
+		negative=fisher.test(count.table, or=1/or.multiplier, alternative="less")$p.value)
+	direction<-which.min(test.results)
+	result<-test.results[direction]
+	if(invert)result<-1-result
+	if(direction==2){result<-result*(-1)}
+	return(result)
+	}
+
+
+# accociation calculation using lme4
+glmer.coef<-function(dataset, random.effect, run.check= FALSE)
+	{
+	if(run.check)dataset<-or.check(dataset)	
+	model<-glmer(dataset[, 2]~dataset[, 1] + (1 | random.effect), family=binomial(link="logit"),
+		control=glmerControl(optimizer="bobyqa")) # Note: optimizer doesn't make much difference in most cases
+	result<-summary(model)$coefficients[2, ]
+	return(result)
+	}

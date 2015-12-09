@@ -1,6 +1,6 @@
 export(
 binary.entropy, clean.dataset,
-fisher.test.pval,
+fisher.test.pval, glmer.coef,
 make.binary, make.long.format, make.wide.format,
 or.symmetric, or.asymmetric, or.glm, or.glmer, mutual.information,
 plot.spaa, prop.occupied,

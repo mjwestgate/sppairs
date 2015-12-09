@@ -12,7 +12,7 @@ or.glmer(dataset, random.effect, complex)
 
   \item{random.effect}{a factor to be used as random effect in glmer(lme4)}
 
-  \item{complex}{logical, defaulting to FALSE. If true, or.glmer returns details of the model (slope and intercept) used to calculate each odds ratio, and the proportion of rows at which species B is present, as well as the odds ratio. Note that this may lead to incompatability with summary or plot methods as currently implemented - only recmomended for evaluation purposes.}
+  \item{complex}{logical, defaulting to FALSE. If true, or.glmer returns details of the model (slope and intercept) used to calculate each odds ratio, and the proportion of rows at which species B is present, as well as the odds ratio. Note that this may lead to incompatability with summary or plot methods as currently implemented - only recommended for evaluation purposes.}
 }
 \value{
 value of the odds ratio between those species

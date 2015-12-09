@@ -12,21 +12,21 @@ n.species<-dim(x)[2]
 combinations<-t(combn(c(1:n.species), 2))
 if(asymmetric){	combinations<-rbind(combinations, combinations[, c(2, 1)])}
 result<-data.frame(
-	col1=combinations[, 1],
-	col2=combinations[, 2],
 	sp1=colnames(x)[combinations[, 1]],
 	sp2=colnames(x)[combinations[, 2]],
 	stringsAsFactors=FALSE)
+result.list<-split(result, c(1:nrow(result)))
 
-# calculate pairwise association using the specified method
-association.value<-apply(result[, 1:2], 1, FUN=function(y, source, method, ...){
-	y<-as.numeric(y)
+# apply method to specified set of species
+association.list<-lapply(result.list,  FUN=function(y, source, method, ...){
+	y<-as.character(y)
 	dataset.thisrun<-source[, y]
 	value<-do.call(method, list(dataset.thisrun, ...))
 	return(value)
-	}, source=x, method=method, ...=...)
-result$value<-as.numeric(association.value)
-result<-result[, -c(1:2)]
+	}, source=x, method=method, ... = ...)
+result<-cbind(result, do.call(rbind, association.list))
+if(ncol(result)==3 & colnames(result)[3]=="do.call(rbind, association.list)"){
+	colnames(result)[3]<-"value"}
 result<-result[order(result$sp1, result$sp2), ]
 
 # add attributes to show how values were calculated.
@@ -131,6 +131,8 @@ make.wide.format<-function(
 			result[row.i, col.i]<-input[i, 3]
 			result[col.i, row.i]<-input[i, 3]}
 	}
+	rownames(result)<-spp.names
+	colnames(result)<-spp.names
 	return(result)
 	}
 
