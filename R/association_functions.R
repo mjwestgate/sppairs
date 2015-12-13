@@ -60,8 +60,13 @@ z1<-sum(as.numeric(fixef(model)))
 odds.ratio<-or.regression(b, z0, z1)
 if(complex){
 	return(c(b=b, 
-		intercept=z0, slope=as.numeric(fixef(model))[2], 
-		converge.warning= converge.warning, or.asymmetric=or.asymmetric(dataset), value=odds.ratio))
+		intercept=z0, 
+		slope=as.numeric(fixef(model))[2], 
+		se=summary(model)$coefficients[2, 2],
+		pval=summary(model)$coefficients[2, 4],
+		converge.warning= converge.warning, 
+		or.asymmetric=or.asymmetric(dataset), 
+		value=odds.ratio))
 }else{return(odds.ratio)}
 }
 
@@ -75,7 +80,9 @@ model<-glm(dataset[, 2]~dataset[, 1], family=binomial(link="logit"))
 z0<-as.numeric(coef(model)[1])	# intercept; occurrence of sp. A in the absence of sp. B
 z1<-sum(as.numeric(coef(model)))	# intercept + slope; occurrence of sp. A in the presence of sp. B
 odds.ratio<-or.regression(b, z0, z1)
-if(complex){return(c(b=b, intercept=z0, slope=as.numeric(coef(model)[2]), value=odds.ratio))
+if(complex){return(c(b=b, intercept=z0, 
+	slope=as.numeric(coef(model)[2]), 
+	value=odds.ratio))
 }else{return(odds.ratio)}
 }
 
